@@ -104,26 +104,26 @@ CREATE TABLE IF NOT EXISTS `pma__tracking` (
     `tracking`
     set
 (
-            'UPDATE',
-            'REPLACE',
-            'INSERT',
-            'DELETE',
-            'TRUNCATE',
-            'CREATE DATABASE',
-            'ALTER DATABASE',
-            'DROP DATABASE',
-            'CREATE TABLE',
-            'ALTER TABLE',
-            'RENAME TABLE',
-            'DROP TABLE',
-            'CREATE INDEX',
-            'DROP INDEX',
-            'CREATE VIEW',
-            'ALTER VIEW',
-            'DROP VIEW'
-        ) default NULL,
-        `tracking_active` int(1) unsigned NOT NULL default '1',
-        PRIMARY KEY (`db_name`, `table_name`, `version`)
+        'UPDATE',
+        'REPLACE',
+        'INSERT',
+        'DELETE',
+        'TRUNCATE',
+        'CREATE DATABASE',
+        'ALTER DATABASE',
+        'DROP DATABASE',
+        'CREATE TABLE',
+        'ALTER TABLE',
+        'RENAME TABLE',
+        'DROP TABLE',
+        'CREATE INDEX',
+        'DROP INDEX',
+        'CREATE VIEW',
+        'ALTER VIEW',
+        'DROP VIEW'
+    ) default NULL,
+    `tracking_active` int(1) unsigned NOT NULL default '1',
+    PRIMARY KEY (`db_name`, `table_name`, `version`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE = utf8_bin;
 
 -- User config

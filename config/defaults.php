@@ -2,62 +2,41 @@
 
 declare(strict_types=1);
 
-// Application's default settings.
+// Application's default settings
 
-// Error reporting.
+// Error reporting
 // Default settings: disable all error reporting for production.
 error_reporting(0);
 ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
-
-// Timezone.
+// Timezone
 date_default_timezone_set('America/Toronto');
 
-function myCustomErrorHandler(int $error_no, string $error_message, string $file, int $line_number)
+
+function myCustomErrorHandler(int $error_no, string $error_message, string $file, int $line)
 {
-    echo sprintf(
-        "<strong>Error:</strong> %s <br><strong>Message:</strong> %s <br> <strong> occurred in:</strong> [%s] <strong> at line:</strong> [%s] <br>",
-        getErrorName($error_no),
-        $error_message,
-        $file,
-        $line_number
-    );
+    echo sprintf('Oh snap! Something went wrong... Error: #%d occurred in %s at line %d: Message: %s ', $error_no, $file, $line, $error_message);
 }
 
 set_error_handler('myCustomErrorHandler');
 
-
 $settings = [];
 
-// Error handler.
+// Error handler
 $settings['error'] = [
     // Should be set to false for the production environment
     'display_error_details' => false,
 ];
 
-
-//TODO: Set the session path to a temporary directory.
-$settings['session'] = [
-    'name' => 'app_session',
-    'lifetime' => 30 * 557200,
-    //'path' => realpath(__DIR__ . '/../var/tmp'),
-    // Must be set to the application's base directory name.
-    'path' => '/' . APP_ROOT_DIR_NAME,
-    'domain' => 'localhost',
-    'secure' => false,
-    'httponly' => true,
-    'cache_limiter' => 'nocache',
-];
-
-// Logger settings.
+// Logger settings
 $settings['logger'] = [
     // Log file location
-    'path' => APP_BASE_DIR_PATH . '/var/logs',
+    'path' => realpath(__DIR__ . '/../var/logs'),
     // Default log level
     'level' => Psr\Log\LogLevel::DEBUG,
 ];
 
-// Database settings.
+// Database settings
 $settings['db'] = [
     'host' => 'localhost',
     'encoding' => 'utf8mb4',

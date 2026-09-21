@@ -19,7 +19,7 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: slim_mvc
+      MYSQL_DATABASE: slim_app
       MYSQL_USER: slim_user
       MYSQL_PASSWORD: slim_pass
     volumes:

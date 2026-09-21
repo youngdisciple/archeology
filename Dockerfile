@@ -4,14 +4,12 @@ FROM php:8.4-apache
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libonig-dev \
-    libicu-dev \
     libzip-dev \
-    libpng-dev \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql curl mbstring intl zip gd
+RUN docker-php-ext-install pdo pdo_mysql curl mbstring zip
 
 # Enable Apache mod_rewrite for .htaccess
 RUN a2enmod rewrite
@@ -19,16 +17,13 @@ RUN a2enmod rewrite
 # Copy custom Apache virtual host config
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Copy custom PHP configuration
-COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
-
 # Copy application files
 COPY . /var/www/html/
 
 # Remove root .htaccess (not needed in Docker - document root is already public/)
 RUN rm -f /var/www/html/.htaccess
 
-# Copy Docker env config to env.php (for standalone Docker usage; docker-compose overrides via volume mount)
+# Copy Docker env config to env.php (auto-setup for students)
 RUN cp /var/www/html/config/env.docker.php /var/www/html/config/env.php
 
 # Create logs directory with proper permissions

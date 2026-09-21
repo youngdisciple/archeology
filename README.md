@@ -1,53 +1,29 @@
-# Slim Framework Starter Template
+- [Starter Template](#starter-template)
+  - [How Do I Use/Deploy this Template?](#how-do-i-usedeploy-this-template)
+    - [Option 1: Using Composer (Recommended)](#option-1-using-composer-recommended)
+    - [Option 2: Using Docker (macOS/Linux/Windows)](#option-2-using-docker-macoslinuxwindows)
+    - [Option 3: Manual Installation](#option-3-manual-installation)
+    - [Option 4: Using Nginx (Native Server)](#option-4-using-nginx-native-server)
+  - [How Do I Configure My Database Connection?](#how-do-i-configure-my-database-connection)
+  - [How do I Use Composer with Wampoon?](#how-do-i-use-composer-with-wampoon)
+  - [On Using Environment Variables](#on-using-environment-variables)
+  - [Useful VS Code Keybindings](#useful-vs-code-keybindings)
+  
+# Starter Template
 
-A lightweight MVC web application starter template built on top of the Slim PHP microframework. Ideal for projects that require Slim's simplicity without sacrificing the benefits of a clean MVC architecture.
-
-## Why Using this Template?
-
-This template provides a starting point for building web applications with the Slim 4 framework using the classic MVC (Model–View–Controller) pattern. It includes everything you need to get started, without the extra complexity of larger frameworks.
-
-## What's Included
-
-This starter template follows best practices and adheres to industry standards:
-
-- **Slim 4**: The "slim" PHP microframework
-- **Routing**: Slim's custom routing based on [FastRoute](https://github.com/nikic/FastRoute)
-- **Dependency injection container** (PSR-11)
-- **HTTP message interfaces** (PSR-7)
-- **HTTP Server Request Handlers**, Middleware (PSR-15)
-- **Autoloader** (PSR-4)
-- **Logger** (PSR-3)
-- **Code styles** (PSR-12)
-- **Composer** - Dependency management
-
-## Requirements
-
-- PHP 8.2 or higher
-- Composer (for dependency management)
-- A web server (Apache, Nginx)
+This repository contains an application skeleton for creating REST-based Web services using the latest version of the [**Slim micro framework**](https://www.slimframework.com/).
 
 ## How Do I Use/Deploy this Template?
 
-- [Option 1: Using Composer (Recommended)](#option-1-using-composer-recommended)
-- [Option 2: Using Docker (macOS/Linux/Windows)](#option-2-using-docker-macoslinuxwindows)
-- [Option 3: Manual Installation](#option-3-manual-installation)
-
 ### Option 1: Using Composer (Recommended)
-
-**Prerequisites:**
-- PHP 8.2 or higher installed locally
-- [Composer](https://getcomposer.org/) installed globally
-- A web server (Apache/Nginx) or [Wampoon](https://wampoon-box.github.io/)
-
-> **Don't have a WAMP/LAMP stack installed?** Use [Option 2: Docker](#option-2-using-docker-macoslinuxwindows) instead.
 
 1. Open a terminal in your web server's **document root** (i.e., `htdocs`).
 2. Run the following command:
    ```bash
-   composer create-project frostybee/slim-mvc [project-name]-app
+   composer create-project frostybee/slim-template [project-name]-api
    ```
-   Replace `[project-name]` with your project name (e.g., `worldcup-app`).
-3. Open your `[project-name]-app` folder in VS Code.
+   Replace `[project-name]` with your project name (e.g., `worldcup-api`).
+3. Open your `[project-name]-api` folder in VS Code.
 4. Adjust your database credentials in `config/env.php` (**see below**).
 
 ### Option 2: Using Docker (macOS/Linux/Windows)
@@ -62,13 +38,13 @@ Docker allows you to run the application in containers without installing PHP, A
 
 1. Clone the repository (since Composer requires PHP, which you may not have installed):
    ```bash
-   git clone https://github.com/frostybee/slim-mvc.git [project-name]-app
+   git clone https://github.com/frostybee/slim-template.git [project-name]-api
    ```
-   Replace `[project-name]` with your project name (e.g., `worldcup-app`).
+   Replace `[project-name]` with your project name (e.g., `worldcup-api`).
 
 2. Navigate to the project folder:
    ```bash
-   cd [project-name]-app
+   cd [project-name]-api
    ```
 
 3. Remove the `.git` folder to start fresh with your own repository:
@@ -88,7 +64,7 @@ Docker allows you to run the application in containers without installing PHP, A
 
 **Configuring the Database:**
 
-The default database name is `slim_mvc`. To use a different database name:
+The default database name is `slim_app`. To use a different database name:
 
 1. Update `docker-compose.yml`:
    ```yaml
@@ -127,23 +103,13 @@ docker-compose up -d
 
 **Common Commands:**
 
-| Action             | Command                                    |
-| ------------------ | ------------------------------------------ |
-| Start containers   | `docker-compose up -d`                     |
-| Stop containers    | `docker-compose down`                      |
-| View app logs      | `docker-compose logs -f app`               |
-| Run composer       | `docker-compose exec app composer install` |
-| Delete database    | `docker-compose down -v`                   |
-| Rebuild containers | `docker-compose up -d --build`             |
-
-**Troubleshooting:**
-
-If the Docker build fails with errors like `The zip extension and unzip/7z commands are both missing`, it's likely due to stale cached layers from a previous build. Force a clean rebuild:
-
-```bash
-docker-compose build --no-cache
-docker-compose up -d
-```
+| Action             | Command                        |
+| ------------------ | ------------------------------ |
+| Start containers   | `docker-compose up -d`         |
+| Stop containers    | `docker-compose down`          |
+| View app logs      | `docker-compose logs -f app`   |
+| Delete database    | `docker-compose down -v`       |
+| Rebuild containers | `docker-compose up -d --build` |
 
 **Working with Multiple Projects:**
 
@@ -176,16 +142,42 @@ services:
 ### Option 3: Manual Installation
 
 1. Download this repository as a `.zip` file.
-2. Extract the downloaded `slim-mvc-main.zip` file locally.
-3. Copy the `slim-mvc-main` folder into your web server's **document root** (i.e., `htdocs`).
-4. Rename the `slim-mvc-main` folder to `[project_name]-app` (for example, `worldcup-app`).
-5. Open your `[project_name]-app` folder in VS Code.
+2. Extract the downloaded `slim-template-main.zip` file locally.
+3. Copy the `slim-template-main` folder into your web server's **document root** (i.e., `htdocs`).
+4. Rename the `slim-template-main` folder to `[project_name]-api` (for example, `worldcup-api`).
+5. Open your `[project_name]-api` folder in VS Code.
 6. Install the project dependencies by running composer. If you are using Wampoon, open a terminal window in VS Code (hit ``` Ctrl+` ```) then run `.\composer.bat update`
    - If you are not using Wampoon to develop your app, just run composer from the command line.
 7. In the `config` folder, make a copy of `env.example.php` and rename it to `env.php`.
 8. Adjust your database credentials (**see below**).
 
 **```NOTE:```** You can always clone this repository. However, if you do, you need to remove the ```.git``` ***hidden*** directory before you copy this template over to ```htdocs```
+
+### Option 4: Using Nginx (Native Server)
+
+If you're running Nginx directly on your server (not through Docker), configuration files are provided in the `nginx/` directory.
+
+**Quick Start:**
+
+1. Deploy your application to your server
+2. Copy `nginx/slim-template.conf` to `/etc/nginx/sites-available/your-project-name`
+3. Edit the configuration file to match your setup (domain, paths, PHP-FPM socket)
+4. Enable the site:
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/your-project-name /etc/nginx/sites-enabled/
+   ```
+5. Test and reload:
+   ```bash
+   sudo nginx -t && sudo systemctl reload nginx
+   ```
+
+**Important Notes:**
+
+- Set document root to the `public/` directory (not the project root)
+- Nginx doesn't use `.htaccess` files - all configuration is in the server config
+- You need PHP-FPM installed and running
+
+For detailed instructions, see [nginx/README.md](nginx/README.md).
 
 ## How Do I Configure My Database Connection?
 
@@ -200,11 +192,10 @@ To install or update your project dependencies deployed on Wampoon, use the `com
 
 | Action                | Command                            | Description                                                                     |
 | --------------------- | ---------------------------------- | ------------------------------------------------------------------------------- |
-| Install dependencies  | `./composer.bat install`           | Installs packages listed in `composer.json` and creates the `vendor` directory. |
-| Update dependencies   | `./composer.bat update`            | Refreshes all packages to the latest versions allowed by `composer.json`.       |
-| Add a package         | `./composer.bat require [package]` | Installs a new package and adds it to `composer.json`.                          |
-| Regenerate autoloader | `./composer.bat dump-autoload -o`  | Rebuilds the optimized autoloader after adding or removing classes.             |
-
+| Install dependencies  | `.\composer.bat install`           | Installs packages listed in `composer.json` and creates the `vendor` directory. |
+| Update dependencies   | `.\composer.bat update`            | Refreshes all packages to the latest versions allowed by `composer.json`.       |
+| Add a package         | `.\composer.bat require [package]` | Installs a new package and adds it to `composer.json`.                          |
+| Regenerate autoloader | `.\composer.bat dump-autoload -o`  | Rebuilds the optimized autoloader after adding or removing classes.             |
 
 ## On Using Environment Variables
 
@@ -217,80 +208,57 @@ Alternatively, you can visit the following link: [Google env search](https://www
 
 Instead, follow the instructions that are detailed in [config/env.example.php](config/env.example.php)
 
-## Project Structure
+## Useful VS Code Keybindings
 
-Here's how everything is organized:
+Below are keybindings that speeds up the insertion of special characters and keywords while editing a `.php` file. These bindings need to be added to your VS Code's keybindings.json
 
-```plaintext
-slim-mvc/
-├── app/
-│   ├── Controllers/    # Your controllers live here
-│   ├── Domain/         # Domain logic and business rules
-│   │   ├── Models/     # Data models and entities
-│   │   └── Services/   # Business logic services
-│   ├── Helpers/        # Utility classes and helpers
-│   ├── Middleware/     # Custom middleware
-│   ├── Routes/         # Route definitions (web & API)
-│   └── Views/          # Your view templates
-├── config/             # Configuration files and bootstrap
-├── data/               # Database files, uploads, etc.
-├── docker/             # Docker configuration files
-│   ├── apache.conf     # Apache virtual host config
-│   └── init-db/        # Database initialization scripts
-├── docs/               # Documentation
-├── public/             # Web-accessible files
-│   ├── assets/         # Static assets (CSS, JS, images)
-│   │   ├── css/        # Stylesheets
-│   │   └── js/         # JavaScript files
-│   ├── index.php       # Application entry point
-│   └── .htaccess       # Apache rewrite rules
-├── var/                # Runtime files
-│   └── logs/           # Application logs
-├── vendor/             # Composer dependencies
-├── Dockerfile          # Docker image definition
-└── docker-compose.yml  # Docker services configuration
-```
-
-## Quick Development Tips
-
-### Adding Routes
-
-Routes are defined in the `app/Routes/` directory. Check out the existing route files to see how it's done.
-
-### Creating Controllers
-
-Controllers go in `app/Controllers/`. They should extend the base controller class and follow PSR-4 autoloading.
-
-### Views and Templates
-
-Templates are stored in `app/Views/`. The template engine is already configured and ready to use.
-
-### Configuration
-
-App configuration lives in `config/`. Modify these files to customize your application settings.
-
-### Logging
-
-Logs are written to the `var/logs/` directory. Use the injected logger in your controllers to track what's happening.
-
-## Need Help?
-
-- Check out the [Slim documentation](https://www.slimframework.com/docs/v4/) for framework-specific questions.
-- Look at the example controllers and routes to see how everything fits together.
-- The code is pretty well commented, so don't hesitate to explore it well.
-
-## Contributing
-
-Got ideas for improvements? Found a bug? Pull requests are welcome!
-
-- [Issues](https://github.com/frostybee/slim-mvc/issues)
-
-## Acknowledgments
-
-The application's bootstrap process and structure of this starter template is based on [slim4-skeleton](https://github.com/odan/slim4-skeleton) by [@odan](https://github.com/odan).  Many thanks to the original developers for their work!
-
-## License
-
-This project is open-sourced under the MIT License. See the `LICENSE` file for the full details.
-
----
+```json
+  {
+    "key": "alt+shift+p",
+    "command": "type",
+    "args": {
+      "text": "=>"
+    },
+    "when": "textInputFocus && editorLangId == php"
+  },
+  {
+    "key": "ctrl+shift+j",
+    "command": "type",
+    "args": {
+      "text": "$this->"
+    },
+    "when": "textInputFocus && editorLangId == php"
+  },
+  {
+    "key": "ctrl+shift+k",
+    "command": "type",
+    "args": {
+      "text": "->"
+    },
+    "when": "textInputFocus && editorLangId == php"
+  },
+  {
+    "key": "ctrl+shift+l",
+    "command": "type",
+    "args": {
+      "text": "<?php"
+    },
+    "when": "textInputFocus && editorLangId == php"
+  },
+  {
+    "key": "shift+enter",
+    "command": "type",
+    "args": {
+      "text": "$"
+    },
+    "when": "textInputFocus && editorLangId == php"
+  },
+  {
+    "key": "shift+space",
+    "command": "type",
+    "args": {
+      "text": "_"
+    },
+    "when": "textInputFocus && editorLangId == php"
+  }
+  ```
