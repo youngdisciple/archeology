@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controllers\AboutController;
+use App\Controllers\SitesController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -44,4 +45,10 @@ return static function (Slim\App $app): void {
         $response->getBody()->write($info);
         return $response->withHeader('Content-Type', 'text/html');
     });
+
+
+    //*ROUTES FOR SITES COLLECTION
+
+        //!GET ROUTES FOR COLLECTION
+        $app->get('/sites', [SitesController::class, 'handleGetSites']);
 };
