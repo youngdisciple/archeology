@@ -157,6 +157,55 @@ abstract class BaseModel
         }
     }
 
+    protected function paginate(string $sql, array $args = [], $fetchMode = PDO::FETCH_ASSOC): array
+    {
+        // 1. Find/compute the total number (aka the count) of rows that will be included in the result set
+        // of the received query
+        //
+        // --
+        // 2. Instantiate the PaginationHelper; pass:
+        //      - page number
+        //      - page size
+        //      - & the count
+        // --
+        // 3. Get the offset from helper
+        // --
+        // 4. Append the LIMIT keyword to the query
+        // --
+        // 5. Execute the constrained query by executing fetchALL
+        // --
+        // 6. Get and combine the metadata retrieved from the PaginationHelper instance
+        // --
+        // 7. Return
+
+        // 1.
+        $count = $this->count($sql);
+
+        // 2.
+        $paginationHelper = new PaginationHelper($this->current_page, $this->records_per_page, $count);
+
+        // 3.
+        $offset = $paginationHelper->getOffset();
+
+        // 4.
+        $sql .= " LIMIT $this->records_per_page OFFSET $offset";
+
+        // 5.
+        $paginatedData = $this->fetchAll($sql, $args);
+
+        //6.
+        $metadata = $paginationHelper->getPaginationMetadata();
+
+        //7.
+        $data = [
+            'meta' => $metadata,
+            'data' => $paginatedData
+        ];
+
+        return $data;
+    }
+
+
     /**
      * Fetches all results from a SQL query as an array.
      *
