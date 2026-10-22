@@ -9,7 +9,7 @@ use App\Domain\Services\SitesServices;
 
 class SitesController extends BaseController
 {
-    public function __construct(private SitesModel $sites_model)
+    public function __construct(private SitesServices $sites_services, private SitesModel $sites_model)
     {
         parent::__construct($sites_model);
     }
@@ -40,7 +40,29 @@ class SitesController extends BaseController
     //*callbacks for POST
     public function handleCreateSites(Request $request, Response $response): Response
     {
-        echo "test";
+        //*Retrieve the representation of the collection items that need to be created
+        $payload = $request->getParsedBody();
+        //*Pass the list of new collection items to the Service component to be validated and then inserted into the database
+        $result = $this->sites_services->doCreateSites($payload);
+        $response_data = [];
+        if ($result->isSuccess()) {
+            $code = 201;
+            $response_data = [
+                "code" => $code,
+                "message" => "The list of new sites was properly created!"
+            ];
+            return $this->renderJson($response, $response_data, $code);
+        }
+        if ($result->isFailure()) {
+            $code = 400;
+            $response_data = [
+                "code" => $code,
+                "status" => "error",
+                "message" => "Something went wrong, insertion of the new site was aborted",
+                "details" => $result->getErrors()
+            ];
+            return $this->renderJson($response, $response_data);
+        }
         return $response;
     }
 }

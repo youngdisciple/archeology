@@ -23,4 +23,9 @@ class SitesModel extends BaseModel
     {
         return $this->getSubCollection($site_id, 'archeological_site', 'historical_period', 'period_id');
     }
+
+    public function createSite(array $sites)
+    {
+        return $this->insert('archeological_sites', $sites);
+    }
 }

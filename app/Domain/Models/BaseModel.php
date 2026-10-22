@@ -180,7 +180,7 @@ abstract class BaseModel
         // 7. Return
 
         // 1.
-        $count = $this->count($sql);
+        $count = $this->count($sql, $args);
 
         // 2.
         $paginationHelper = new PaginationHelper($this->current_page, $this->records_per_page, $count);
@@ -454,6 +454,7 @@ abstract class BaseModel
     protected function getSubCollection(int $parent_collection_id, string $parent_table, string $sub_table, string $id_column): array | false
     {
         $this->validateTableName($parent_table);
+        //$this->validateTableName($parent_pk);
         $this->validateTableName($sub_table);
         $this->validateTableName($id_column);
         $sql = "SELECT $sub_table.* FROM $sub_table JOIN $parent_table ON $sub_table.$id_column = $parent_table.$id_column WHERE $parent_table.$id_column = :parent_collection_id";
