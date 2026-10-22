@@ -48,7 +48,12 @@ return static function (Slim\App $app): void {
 
 
     //*ROUTES FOR SITES COLLECTION
-
-        //!GET ROUTES FOR COLLECTION
-        $app->get('/sites', [SitesController::class, 'handleGetSites']);
+    //!GET ROUTES FOR SITES
+    //may need to change idk if it works yet
+    $app->get('/archeological_sites', [SitesController::class, 'handleGetSites']);
+    $app->get('/archeological_sites/site_id', [SitesController::class, 'handleGetSitesById']);
+    $app->get('/archeological_sites/site_id/cultures', [SitesController::class, 'handleGetSiteCulture']);
+    $app->get('/archeological_sites/site_id/historical_periods', [SitesController::class, 'handleGetSitePeriod']);
+    //!POST ROUTES FOR SITES
+    $app->post('/archeological_sites', [SitesController::class, 'handleCreateSites']);
 };
