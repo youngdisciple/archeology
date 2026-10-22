@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controllers\AboutController;
+use App\Controllers\MuseumController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -18,6 +19,8 @@ return static function (Slim\App $app): void {
     //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
     //* ROUTE: GET /players
     //$app->get('/players', [PlayersController::class, 'handleGetPlayers']);
+    $app->get('/museums', [MuseumController::class, 'handleGetMuseums']);
+    $app->get('/museums/{museum_id}', [MuseumController::class, 'handleGetMuseumById']);
 
     //* ROUTE: GET /ping
     $app->get('/ping', function (Request $request, Response $response, $args) {
@@ -29,6 +32,9 @@ return static function (Slim\App $app): void {
         $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR));
         return $response;
     });
+
+    //* ROUTE: POST /
+    $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
 
     // Example route to test error handling.
     $app->get('/error', function (Request $request, Response $response, $args) {
