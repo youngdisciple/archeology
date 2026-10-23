@@ -25,9 +25,10 @@ class MuseumModel extends BaseModel
         return $this->fetchSingle($sql, ["museum_id" => $museum_id]);
     }
 
-    public function createMuseum(array $museum) {
+    public function createMuseum(array $museum)
+    {
         return $this->insert(
-            "museums",
+            "museum",
             $museum
         );
     }
