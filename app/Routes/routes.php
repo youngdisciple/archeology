@@ -6,7 +6,7 @@ use App\Controllers\AboutController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-
+use App\Controllers\ScientistsController;
 
 return static function (Slim\App $app): void {
 
@@ -18,6 +18,12 @@ return static function (Slim\App $app): void {
     //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
     //* ROUTE: GET /players
     //$app->get('/players', [PlayersController::class, 'handleGetPlayers']);
+
+    //* ROUTE: GET /scientists
+    $app->get('/scientists', [ScientistsController::class, 'handleGetScientists']);
+
+    //* ROUTE: GET /scientists
+    $app->post('/scientists', [ScientistsController::class, 'handleCreateScientists']);
 
     //* ROUTE: GET /ping
     $app->get('/ping', function (Request $request, Response $response, $args) {

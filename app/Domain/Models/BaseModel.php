@@ -6,6 +6,7 @@ namespace App\Domain\Models;
 
 use PDO;
 use App\Helpers\Core\PDOService;
+use App\Helpers\PaginationHelper;
 use Exception;
 
 /**
