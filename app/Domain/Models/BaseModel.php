@@ -414,18 +414,26 @@ abstract class BaseModel
      * A reusable function that uses an SQL query to get all tables about a collection
      * @param array $filters
      * @param string $tableName
+     * @param string $nameColumn
      * @return array
      */
-    protected function getCollection(array $filters, string $tableName): array
-    {
+
+     //! CHANGE: now allows each collection to specify its name column instead of assuming all tables use 'name'. (makes filtering better) -F
+    protected function getCollection(array $filters, string $tableName, string $nameColumn = 'name'
+    ): array {
         $this->validateTableName($tableName);
+        $this->validateTableName($nameColumn);
+
         $placeholder = [];
         $sql = "SELECT * FROM $tableName WHERE 1=1";
-        $rowName = $filters["name"] ?? '';
-        if (!empty($rowName)) {
-            $sql .= " AND name LIKE CONCAT('%' , :row_name , '%')";
-            $placeholder["row_name"] = $rowName;
+
+        $rowName = $filters[$nameColumn] ?? '';
+
+        if ($rowName !== '') {
+            $sql .= " AND $nameColumn LIKE CONCAT('%', :row_name, '%')";
+            $placeholder['row_name'] = $rowName;
         }
+
         return $this->paginate($sql, $placeholder);
     }
 

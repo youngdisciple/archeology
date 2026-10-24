@@ -6,7 +6,7 @@ class SitesModel extends BaseModel
 {
     public function getSites(array $filters): array
     {
-        return $this->getCollection($filters, 'archeological_site');
+        return $this->getCollection($filters, 'archeological_site', 'site_name');
     }
 
     public function getSitesById(int $site_id): array | false

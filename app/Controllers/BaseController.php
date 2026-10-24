@@ -44,7 +44,16 @@ abstract class BaseController
      */
     protected function isValidPagination(?string $current_page, ?string $page_size): bool
     {
-        $pattern = "/^\d{1,5}$/";
+        // validate types
+        if (!is_string($current_page) && !is_int($current_page)) {
+          return false;
+        }
+
+        if (!is_string($page_size) && !is_int($page_size)) {
+          return false;
+        }
+
+        $pattern = "/^[1-9][0-9]{0,2}$/"; // positive ints from 1 to 999
         return preg_match($pattern, $current_page) === 1 && preg_match($pattern, $page_size) === 1;
     }
 

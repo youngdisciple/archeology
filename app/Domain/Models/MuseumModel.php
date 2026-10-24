@@ -8,7 +8,7 @@ class MuseumModel extends BaseModel
     //* READ
     public function getMuseums(array $filters): array
     {
-        return $this->getCollection($filters, 'museum');
+        return $this->getCollection($filters, 'museum', 'museum_name');
     }
 
     public function getMuseumById(int $museum_id): array | false
