@@ -5,26 +5,28 @@ namespace App\Domain\Models;
 
 class MuseumModel extends BaseModel
 {
+    //* READ
     public function getMuseums(array $filters): array
     {
-        $placeholder_values = [];
-        $sql = "SELECT * FROM museum WHERE 1=1 ";
-        $museum_name = $filters["name"] ?? '';
-        if (!empty($museum_name)) {
-            $sql .= " AND name LIKE CONCAT ('%', :museum_name, '%')";
-            $placeholder_values["museum_name"] = $museum_name;
-        }
-        return $this->paginate($sql, $placeholder_values);
+        return $this->getCollection($filters, 'museum');
     }
 
     public function getMuseumById(int $museum_id): array | false
     {
-
-        $sql = "SELECT * FROM museum WHERE  museum_id = :museum_id";
-
-        return $this->fetchSingle($sql, ["museum_id" => $museum_id]);
+        return $this->getCollectionById($museum_id, 'museum', 'museum_id');
     }
 
+    public function getMuseumScientist(array $filters, int $museum_id): array | false
+    {
+        return $this->getSubCollection($museum_id, 'museum', 'scientist', 'museum_id');
+    }
+
+    public function getMuseumArtifact(array $filters, int $museum_id): array | false
+    {
+        return $this->getSubCollection($museum_id, 'museum', 'artifacts', 'museum_id');
+    }
+
+    //* CREATE
     public function createMuseum(array $museum)
     {
         return $this->insert(

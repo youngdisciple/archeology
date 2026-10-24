@@ -17,12 +17,6 @@ return static function (Slim\App $app): void {
     //* ROUTE: GET /
     $app->get('/', [AboutController::class, 'handleAboutWebService']);
 
-    //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
-    //* ROUTE: GET /players
-    //$app->get('/players', [PlayersController::class, 'handleGetPlayers']);
-    $app->get('/museums', [MuseumController::class, 'handleGetMuseums']);
-    $app->get('/museums/{museum_id}', [MuseumController::class, 'handleGetMuseumById']);
-
     //* ROUTE: GET /ping
     $app->get('/ping', function (Request $request, Response $response, $args) {
 
@@ -34,7 +28,12 @@ return static function (Slim\App $app): void {
         return $response;
     });
 
-    //* ROUTE: POST /
+    //* Museum routes
+    $app->get('/museums', [MuseumController::class, 'handleGetMuseums']);
+    $app->get('/museums/{collection_id}', [MuseumController::class, 'handleGetMuseumById']);
+    $app->get('/museums/{parent_collection_id}/scientists', [MuseumController::class, 'handleGetMuseumScientist']);
+    $app->get('/museums/{parent_collection_id}/artifacts', [MuseumController::class, 'handleGetMuseumArtifact']);
+    
     $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
 
     // Example route to test error handling.

@@ -13,35 +13,28 @@ class MuseumController extends BaseController
     public function __construct(
         private MuseumService $museumService,
         private MuseumModel $museumModel
-    ) {}
+    ) {
+        parent::__construct($museumModel);
+    }
 
     public function handleGetMuseums(Request $request, Response $response): Response
     {
-        $filters = $request->getQueryParams();
-
-        $museums = $this->museumModel->getMuseums($filters);
-        $data = json_encode($museums);
-        $response->getBody()->write($data);
-
-        return $response->withHeader(
-            "Content-Type",
-            "application/json"
-        );
+        return $this->handleGetCollection($request, $response, 'getMuseums');
     }
 
     public function handleGetMuseumById(Request $request, Response $response, array $args): Response
     {
-        $museum_id = $args["museum_id"];
+        return $this->handleGetCollectionById($request, $response, $args, 'getMuseumById');
+    }
 
-        $museum = $this->museumModel->getMuseumById($museum_id);
+    public function handleGetMuseumScientist(Request $request, Response $response, array $args): Response
+    {
+        return $this->handleGetSubCollection($request, $response, $args, 'getMuseumScientist');
+    }
 
-        $data = json_encode($museum);
-        $response->getBody()->write($data);
-
-        return $response->withHeader(
-            "Content-Type",
-            "application/json;charset=UTF-8"
-        );
+    public function handleGetMuseumArtifact(Request $request, Response $response, array $args): Response
+    {
+        return $this->handleGetSubCollection($request, $response, $args, 'getMuseumArtifact');
     }
 
     //* POST
@@ -49,13 +42,14 @@ class MuseumController extends BaseController
     {
         //* 1. Retrieve the representation of the new collection items to be created.
         $payload = $request->getParsedBody();
+
         //* 2. Pass the list of new collection items to the service component to be validated and then inserted into the database.
         $result = $this->museumService->doCreateMuseums($payload);
 
         $responseData = [];
         $code = 201;
 
-        // We need to prepare a JSON response
+        // JSON response
         if ($result->isSuccess()) {
             $responseData = [
                 "code" => 201,
@@ -73,12 +67,5 @@ class MuseumController extends BaseController
         }
 
         return $this->renderJson($response, $responseData, $code);
-
-        dd($payload);
-        echo "posting";
     }
-
-    //* PUT
-
-    //* DELETE
 }

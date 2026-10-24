@@ -396,30 +396,6 @@ abstract class BaseModel
         return $stmt->rowCount();
     }
 
-    protected function paginate(string $sql, array $args = [], $fetchMode = PDO::FETCH_ASSOC): array
-    {
-        //* 1) Get/compute the total number (the count) of rows that will be included in the results set of the received query.
-            $count = $this->count($sql, $args);
-        //* 2) Instantiate the PaginationHelper: pass the page number, page size, and the count seen in step 1
-            $helper = new PaginationHelper(
-                $this->current_page,
-                $this->records_per_page,
-                $count
-            );
-        //* 3) Get the offset from the PaginationHelper
-            $offset = $helper->getOffset();
-        //* 4) Append the LIMIT keyword to the query
-            $sql .= " LIMIT $this->records_per_page OFFSET $offset";
-        //* 5) Execute the constrained query, call fetchAll()
-           $data = $this->fetchAll($sql, $args);
-        //* 6) Get the metadata from the PaginationHelper and combine it with the data
-            $meta = $helper->getPaginationMetadata();
-        //* 7) Return
-            return [
-                "meta" => $meta,
-                "data" => $data,
-            ];
-    }
 
     /**
      * Sets the pagination options for the current instance.
