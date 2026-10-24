@@ -415,11 +415,12 @@ abstract class BaseModel
      * @param array $filters
      * @param string $tableName
      * @param string $nameColumn
+     * @param array $sortableFields
      * @return array
      */
 
-     //! CHANGE: now allows each collection to specify its name column instead of assuming all tables use 'name'. (makes filtering better) -F
-    protected function getCollection(array $filters, string $tableName, string $nameColumn = 'name'
+    //! CHANGE 2: added optional sorting (collection-specific models would define the allowed sortable fields) -F
+    protected function getCollection(array $filters, string $tableName, string $nameColumn = 'name', array $sortableFields = []
     ): array {
         $this->validateTableName($tableName);
         $this->validateTableName($nameColumn);
@@ -432,6 +433,25 @@ abstract class BaseModel
         if ($rowName !== '') {
             $sql .= " AND $nameColumn LIKE CONCAT('%', :row_name, '%')";
             $placeholder['row_name'] = $rowName;
+        }
+
+        // Sort by an allowed field
+        $sort = $filters['sort'] ?? '';
+
+        if ($sort !== '') {
+            if (!is_string($sort)) {
+                throw new \InvalidArgumentException("Invalid sorting parameter.");
+            }
+
+            $descending = str_starts_with($sort, '-');
+            $sortColumn = $descending ? substr($sort, 1) : $sort;
+
+            if (!in_array($sortColumn, $sortableFields, true)) {
+                throw new \InvalidArgumentException("Invalid sorting field.");
+            }
+
+            $direction = $descending ? 'DESC' : 'ASC';
+            $sql .= " ORDER BY $sortColumn $direction";
         }
 
         return $this->paginate($sql, $placeholder);
