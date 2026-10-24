@@ -158,6 +158,55 @@ abstract class BaseModel
         }
     }
 
+    protected function paginate(string $sql, array $args = [], $fetchMode = PDO::FETCH_ASSOC): array
+    {
+        // 1. Find/compute the total number (aka the count) of rows that will be included in the result set
+        // of the received query
+        //
+        // --
+        // 2. Instantiate the PaginationHelper; pass:
+        //      - page number
+        //      - page size
+        //      - & the count
+        // --
+        // 3. Get the offset from helper
+        // --
+        // 4. Append the LIMIT keyword to the query
+        // --
+        // 5. Execute the constrained query by executing fetchALL
+        // --
+        // 6. Get and combine the metadata retrieved from the PaginationHelper instance
+        // --
+        // 7. Return
+
+        // 1.
+        $count = $this->count($sql, $args);
+
+        // 2.
+        $paginationHelper = new PaginationHelper($this->current_page, $this->records_per_page, $count);
+
+        // 3.
+        $offset = $paginationHelper->getOffset();
+
+        // 4.
+        $sql .= " LIMIT $this->records_per_page OFFSET $offset";
+
+        // 5.
+        $paginatedData = $this->fetchAll($sql, $args);
+
+        //6.
+        $metadata = $paginationHelper->getPaginationMetadata();
+
+        //7.
+        $data = [
+            'meta' => $metadata,
+            'data' => $paginatedData
+        ];
+
+        return $data;
+    }
+
+
     /**
      * Fetches all results from a SQL query as an array.
      *
@@ -383,5 +432,57 @@ abstract class BaseModel
     {
         $this->current_page = $current_page;
         $this->records_per_page = $records_per_page;
+    }
+
+    /**
+     * A reusable function that uses an SQL query to get all tables about a collection
+     * @param array $filters
+     * @param string $tableName
+     * @return array
+     */
+    protected function getCollection(array $filters, string $tableName): array
+    {
+        $this->validateTableName($tableName);
+        $placeholder = [];
+        $sql = "SELECT * FROM $tableName WHERE 1=1";
+        $rowName = $filters["name"] ?? '';
+        if (!empty($rowName)) {
+            $sql .= " AND name LIKE CONCAT('%' , :row_name , '%')";
+            $placeholder["row_name"] = $rowName;
+        }
+        return $this->paginate($sql, $placeholder);
+    }
+
+    /**
+     * A reusable function that uses an SQL query to get a singleton resource of a specific collection by using the the collection_id argument
+     * @param int $collection_id
+     * @param string $tableName
+     * @param string $id_column
+     * @return array|false
+     */
+    protected function getCollectionById(int $collection_id, string $tableName, string $id_column): array | false
+    {
+        $this->validateTableName($tableName);
+        $this->validateTableName($id_column);
+        $sql = "SELECT * FROM $tableName WHERE $id_column = :collection_id";
+        return $this->fetchSingle($sql, ["collection_id" => $collection_id]);
+    }
+
+    /**
+     * A reusable function that gets a collection's sub-collection based on that collection's unique ID
+     * @param int $parent_collection_id
+     * @param string $parent_table
+     * @param string $sub_table
+     * @param string $id_column
+     * @return array
+     */
+    protected function getSubCollection(int $parent_collection_id, string $parent_table, string $sub_table, string $id_column): array | false
+    {
+        $this->validateTableName($parent_table);
+        //$this->validateTableName($parent_pk);
+        $this->validateTableName($sub_table);
+        $this->validateTableName($id_column);
+        $sql = "SELECT $sub_table.* FROM $sub_table JOIN $parent_table ON $sub_table.$id_column = $parent_table.$id_column WHERE $parent_table.$id_column = :parent_collection_id";
+        return $this->paginate($sql, ["parent_collection_id" => $parent_collection_id]);
     }
 }
