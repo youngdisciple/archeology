@@ -121,7 +121,7 @@ class ValidationHelper
     */
     public static function validateParams(Request $request, array $rules, bool $case_sensitive = false)
     {
-        $filters = $request->getQueryParams();
+        $params = $request->getQueryParams();
 
         // check if it contains non defined filters
         // $extra = array_diff_key($filters, $rules);
@@ -140,11 +140,11 @@ class ValidationHelper
 
         // check if any given filter doesn't comply to it's respective rule(s)
 
-        foreach ($filters as $filter => $v) {
+        foreach ($params as $param => $v) {
             // false by default
             $v = $case_sensitive ? $v : strtolower($v);
 
-            $valid = $rules[$filter]($v) && is_string($v);
+            $valid = $rules[$param]($v) && is_string($v);
             // WARNING: Query params can either be a string or an array.
             // To my knowledge, there isn't any array parameters in our case
             // so I avoid repeating ourselves by doing the is_string check here
@@ -153,11 +153,11 @@ class ValidationHelper
             if (!$valid) {
                 throw new UnprocessableEntityException(
                     $request,
-                    "Invalid filter value ({$filter} => {$v})"
+                    "Invalid parameter value ({$param} => {$v})"
                 );
             }
         }
 
-        return $filters;
+        return $params;
     }
 }
