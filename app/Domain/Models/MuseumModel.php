@@ -13,6 +13,19 @@ class MuseumModel extends BaseModel
             'city',
             'museum_type',
             'foundation_date'
+        ],
+        // String filters
+        [
+            'city',
+            'museum_type'
+        ],
+        // Date filters
+        [
+            'foundation_date'
+        ],
+        // Boolean filters
+        [
+            'has_website' => 'website'
         ]);
     }
 

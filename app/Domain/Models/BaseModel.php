@@ -7,6 +7,7 @@ namespace App\Domain\Models;
 use PDO;
 use App\Helpers\Core\PDOService;
 use App\Helpers\PaginationHelper;
+use App\Helpers\DateTimeHelper;
 use Exception;
 
 /**
@@ -416,11 +417,12 @@ abstract class BaseModel
      * @param string $tableName
      * @param string $nameColumn
      * @param array $sortableFields
+     * @param array $filterableFields
      * @return array
      */
 
-    //! CHANGE 2: added optional sorting (collection-specific models would define the allowed sortable fields) -F
-    protected function getCollection(array $filters, string $tableName, string $nameColumn = 'name', array $sortableFields = []
+    //! CHANGE 3:  -F
+    protected function getCollection(array $filters, string $tableName, string $nameColumn = 'name', array $sortableFields = [], array $filterableFields = [], array $dateFields = [], array $booleanFields = []
     ): array {
         $this->validateTableName($tableName);
         $this->validateTableName($nameColumn);
@@ -433,6 +435,167 @@ abstract class BaseModel
         if ($rowName !== '') {
             $sql .= " AND $nameColumn LIKE CONCAT('%', :row_name, '%')";
             $placeholder['row_name'] = $rowName;
+        }
+
+        // Filter by allowed string columns
+        foreach ($filterableFields as $column) {
+
+            $this->validateTableName($column);
+
+            $operators = [
+                '' => 'contains',
+                '_equals' => 'equals',
+                '_startsWith' => 'startsWith',
+                '_endsWith' => 'endsWith'
+            ];
+
+            foreach ($operators as $suffix => $operation) {
+
+                $parameter = $column . $suffix;
+
+                if (!array_key_exists($parameter, $filters)) {
+                    continue;
+                }
+
+                $value = $filters[$parameter];
+
+                if (!is_string($value) || $value === '') {
+                    throw new \InvalidArgumentException(
+                        "Invalid value for $parameter."
+                    );
+                }
+
+                $placeholderName = $parameter;
+
+                switch ($operation) {
+                    case 'equals':
+                        $sql .= " AND $column = :$placeholderName";
+                        $placeholder[$placeholderName] = $value;
+                        break;
+
+                    case 'startsWith':
+                        $sql .= " AND $column LIKE :$placeholderName";
+                        $placeholder[$placeholderName] = $value . '%';
+                        break;
+
+                    case 'endsWith':
+                        $sql .= " AND $column LIKE :$placeholderName";
+                        $placeholder[$placeholderName] = '%' . $value;
+                        break;
+
+                    default:
+                        $sql .= " AND $column LIKE :$placeholderName";
+                        $placeholder[$placeholderName] = '%' . $value . '%';
+                        break;
+                }
+            }
+        }
+        // Filter by allowed date columns
+        foreach ($dateFields as $column) {
+
+            $this->validateTableName($column);
+
+            $afterKey = $column . '_after';
+            $beforeKey = $column . '_before';
+            $betweenKey = $column . '_between';
+
+            if (isset($filters[$betweenKey])) {
+
+                if (!is_string($filters[$betweenKey])) {
+                    throw new \InvalidArgumentException(
+                        "Invalid date range for $betweenKey."
+                    );
+                }
+
+                $dates = explode(',', $filters[$betweenKey]);
+
+                if (count($dates) !== 2) {
+                    throw new \InvalidArgumentException(
+                        "Invalid date range."
+                    );
+                }
+
+                $startDate = trim($dates[0]);
+                $endDate = trim($dates[1]);
+
+                // Validate both dates individually.
+                if (
+                    !DateTimeHelper::isValidDate($startDate) ||
+                    !DateTimeHelper::isValidDate($endDate)
+                ) {
+                    throw new \InvalidArgumentException(
+                        "Invalid date format for $betweenKey. Use YYYY-MM-DD."
+                    );
+                }
+
+                // Ensure the date range is chronological.
+                if ($startDate > $endDate) {
+                    throw new \InvalidArgumentException(
+                        "The start date cannot be after the end date."
+                    );
+                }
+
+                $sql .= " AND $column BETWEEN :date_start AND :date_end";
+                $placeholder['date_start'] = $startDate;
+                $placeholder['date_end'] = $endDate;
+
+            } else {
+
+                if (isset($filters[$afterKey])) {
+
+                    $date = $filters[$afterKey];
+
+                    if (!is_string($date) || !DateTimeHelper::isValidDate($date)) {
+                        throw new \InvalidArgumentException(
+                            "Invalid date format for $afterKey. Use YYYY-MM-DD."
+                        );
+                    }
+
+                    $sql .= " AND $column >= :date_after";
+                    $placeholder['date_after'] = $date;
+                }
+
+                if (isset($filters[$beforeKey])) {
+
+                    $date = $filters[$beforeKey];
+
+                    if (!is_string($date) || !DateTimeHelper::isValidDate($date)) {
+                        throw new \InvalidArgumentException(
+                            "Invalid date format for $beforeKey. Use YYYY-MM-DD."
+                        );
+                    }
+
+                    $sql .= " AND $column <= :date_before";
+                    $placeholder['date_before'] = $date;
+                }
+            }
+        }
+
+        // Filter by allowed boolean columns
+        foreach ($booleanFields as $parameter => $column) {
+
+            $this->validateTableName($column);
+
+            if (!array_key_exists($parameter, $filters)) {
+                continue;
+            }
+
+            $value = $filters[$parameter];
+
+            if (!is_string($value) ||
+                !in_array(strtolower($value), ['true', 'false', '1', '0'], true)) {
+                throw new \InvalidArgumentException(
+                    "Invalid boolean value for $parameter."
+                );
+            }
+
+            $hasValue = in_array(strtolower($value), ['true', '1'], true);
+
+            if ($hasValue) {
+                $sql .= " AND $column IS NOT NULL AND $column <> ''";
+            } else {
+                $sql .= " AND ($column IS NULL OR $column = '')";
+            }
         }
 
         // Sort by an allowed field
