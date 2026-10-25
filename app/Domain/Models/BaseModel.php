@@ -251,7 +251,10 @@ abstract class BaseModel
      */
     protected function count(string $sql, array $args = []): int
     {
-        return $this->run($sql, $args)->rowCount();
+        // count the records returned by the original filtered query. (more reliable and includes filtered collections and sub collections)
+        $countSql = "SELECT COUNT(*) FROM ($sql) AS total_records";
+
+        return (int) $this->run($countSql, $args)->fetchColumn();
     }
 
     /**
@@ -421,7 +424,6 @@ abstract class BaseModel
      * @return array
      */
 
-    //! CHANGE 3:  -F
     protected function getCollection(array $filters, string $tableName, string $nameColumn = 'name', array $sortableFields = [], array $filterableFields = [], array $dateFields = [], array $booleanFields = []
     ): array {
         $this->validateTableName($tableName);

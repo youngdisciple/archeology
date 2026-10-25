@@ -36,11 +36,20 @@ class MuseumModel extends BaseModel
 
     public function getMuseumScientist(array $filters, int $museum_id): array | false
     {
+        // Verify that the parent museum exists
+        if ($this->getMuseumById($museum_id) === false) {
+            return false;
+        }
+
         return $this->getSubCollection($museum_id, 'museum', 'scientist', 'museum_id');
     }
 
     public function getMuseumArtifact(array $filters, int $museum_id): array | false
     {
+        // Verify that the parent museum exists
+        if ($this->getMuseumById($museum_id) === false) {
+            return false;
+        }
         return $this->getSubCollection($museum_id, 'museum', 'artifacts', 'museum_id');
     }
 
