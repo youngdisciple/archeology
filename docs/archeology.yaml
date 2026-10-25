@@ -2,6 +2,10 @@ openapi: 3.1.0
 info:
   title: Archeology
   version: 1.0.0
+  description: |
+    REST web service exposing data about archeological sites of the Ancient
+    Mediterranean. This document covers the **/sites** resource (collection,
+    singleton and related sub-collections).
 servers:
   - url: http://localhost/archeology
     description: Localhost server for the archeology web service
@@ -10,10 +14,22 @@ paths:
     get:
       summary: Get the list of famous archeological sites
       operationId: getSites
+      description: Returns a paginated, filterable and sortable collection of
+        archeological sites. Default sort is ascending by `site_id`.
+        String filters are case-insensitive and use "contains" matching.
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSizeParam"
         - $ref: "#/components/parameters/SiteNameParam"
+        - $ref: "#/components/parameters/SiteTypeParam"
+        - $ref: "#/components/parameters/DiscoveryDateParam"
+        - $ref: "#/components/parameters/MinAgeParam"
+        - $ref: "#/components/parameters/MaxAgeParam"
+        - $ref: "#/components/parameters/CountryParam"
+        - $ref: "#/components/parameters/RegionParam"
+        - $ref: "#/components/parameters/ProtectedParam"
+        - $ref: "#/components/parameters/CultureIdParam"
+        - $ref: "#/components/parameters/PeriodIdParam"
       responses:
         "200":
           description: OK
@@ -147,3 +163,17 @@ components:
         type: integer
         minimum: 1
       example: 8
+
+    SiteSortParam:
+      name: sort
+      in: query
+      required: false
+      description: |
+        Field to sort by. Ascending by default; prefix with `-` for descending
+        (e.g. `-discovery_date`).
+        Sortable fields: site_name, site_type, discovery_date, estimated_age,
+        country, region, latitude, longitude, culture_id, period_id.
+      schema:
+        type: string
+        pattern: "^-?(site_name|site_type|discovery_date|estimated_age|country|region|latitude|longitude|culture_id|period_id)$"
+      example: -estimated_age
