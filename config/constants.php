@@ -21,3 +21,7 @@ const HEADERS_CONTENT_TYPE = "Content-Type";
 const APP_MEDIA_TYPE_JSON = "application/json";
 const APP_MEDIA_TYPE_XML = "application/xml";
 const APP_MEDIA_TYPE_YAML = "application/yaml";
+
+// PAGE AND PAGE_SIZE
+const PAGE = 1;
+const PAGE_SIZE = 5;
