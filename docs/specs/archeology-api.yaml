@@ -48,7 +48,6 @@ paths:
           in: query
           description: Whether the museum has a nonempty website field. Accepts true, false, 1, or 0.
           schema: { type: string, enum: ['true', 'false', '1', '0'] }
-          example: 'true'
       responses:
         '200':
           description: Museum Collection
@@ -143,12 +142,10 @@ paths:
           in: query
           description: Partial match on artifact name.
           schema: { type: string }
-          example: Vase
         - name: artifact_type
           in: query
           description: Exact database enum value.
           schema: { type: string }
-          example: Document
         - name: condition
           in: query
           description: Exact database enum value
@@ -334,7 +331,7 @@ components:
       description: Provisional JSON error structure; match the team's actual HttpErrorHandler.
       properties:
         code: { type: integer }
-        status: { type: string, example: Error }
+        status: { type: string}
         message: { type: string }
       required: [code, message]
   responses:
