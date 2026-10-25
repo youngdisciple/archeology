@@ -21,10 +21,8 @@ class ArtifactsController extends BaseController
 
         if (!empty($filters)) {
             $this->artifactsModel->setPaginationOptions(
-                // we're not concerned with them not being set given that the
-                // class has defaults and the function has null coalescing
-                $filters['page'],
-                $filters['page_size']
+                $filters['page'] ?? null,
+                $filters['page_size'] ?? null
             );
 
             $rules = [
