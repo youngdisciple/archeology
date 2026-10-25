@@ -52,7 +52,6 @@ class ArtifactsModel extends BaseModel
         }
 
         // condition
-        // WARNING: DON'T MIX UP WITH 'conditions' VARIABLE
         $condition = $filters['condition'];
         if ( !empty($condition) ) {
             $sql .= " AND condition <= :condition";
@@ -64,8 +63,10 @@ class ArtifactsModel extends BaseModel
     }
 
     // TODO:
-    function getArtifactsById(int $vendor_id): array | False
+    function getArtifactsById(int $artifact_id): array | False
     {
-        return [];
+        $sql = "SELECT * FROM artifacts WHERE id = :id";
+
+        return $this->fetchSingle($sql, ['id' => $artifact_id]);
     }
 }

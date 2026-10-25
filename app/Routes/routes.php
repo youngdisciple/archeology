@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AboutController;
 use App\Controllers\SitesController;
+use App\Controllers\ArtifactsController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -55,4 +56,9 @@ return static function (Slim\App $app): void {
     $app->get('/sites/{parent_collection_id}/periods', [SitesController::class, 'handleGetSitePeriod']);
     //!POST ROUTES FOR SITES
     $app->post('/sites', [SitesController::class, 'handleCreateSites']);
+
+    //* ROUTES FOR ARTIFACTS COLLECTION
+    // GET ROUTES FOR ARTIFACTS
+    $app->get('/artifacts', [ArtifactsController::class, 'index']);
+    $app->get('/artifacts/{artifactId}', [ArtifactsController::class, 'index']);
 };
