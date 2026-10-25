@@ -119,7 +119,7 @@ class ValidationHelper
     * @param array $rules The rules parameter must take in the following shape: ["filter" (exact name) => rule (anonymous function)]
     * @return array The validated filters
     */
-    public static function validateFilters(Request $request, array $rules)
+    public static function validateParams(Request $request, array $rules, bool $case_sensitive = false)
     {
         $filters = $request->getQueryParams();
 
@@ -139,7 +139,11 @@ class ValidationHelper
         // relevance.
 
         // check if any given filter doesn't comply to it's respective rule(s)
+
         foreach ($filters as $filter => $v) {
+            // false by default
+            $v = $case_sensitive ? $v : strtolower($v);
+
             $valid = $rules[$filter]($v) && is_string($v);
             // WARNING: Query params can either be a string or an array.
             // To my knowledge, there isn't any array parameters in our case
