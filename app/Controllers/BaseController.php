@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Domain\Models\BaseModel;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Exceptions\InvalidResourceException;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Domain\Models\BaseModel;
-
 
 abstract class BaseController
 {
-
     public function __construct(private BaseModel $base_model) {}
+
     protected function renderJson(Response $response, array $data, int $status_code = 200): Response
     {
         // var_dump($data);
@@ -58,8 +57,8 @@ abstract class BaseController
     protected function handleGetCollection(Request $request, Response $response, string $model_func): Response
     {
         $filters = $request->getQueryParams();
-        $current_page = $filters["current_page"] ?? "1";
-        $page_size = $filters["page_size"] ?? "10";
+        $current_page = $filters["current_page"];
+        $page_size = $filters["page_size"];
         if (!$this->isValidPagination($current_page, $page_size)) {
             throw new InvalidResourceException($request, "Please make sure the current_page and page_size are set to non-negative integer");
         }
@@ -96,8 +95,8 @@ abstract class BaseController
     {
         $filters = $request->getQueryParams();
         $parent_collection_id = $args["parent_collection_id"];
-        $current_page = $filters["current_page"] ?? "1";
-        $page_size = $filters["page_size"] ?? "10";
+        $current_page = $filters["current_page"];
+        $page_size = $filters["page_size"];
         if (!$this->isValidPagination($current_page, $page_size)) {
             throw new InvalidResourceException($request, "Please make sure the current_page and page_size are set to non-negative integer");
         }
