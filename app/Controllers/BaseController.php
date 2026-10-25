@@ -57,8 +57,8 @@ abstract class BaseController
     protected function handleGetCollection(Request $request, Response $response, string $model_func): Response
     {
         $filters = $request->getQueryParams();
-        $current_page = $filters["current_page"];
-        $page_size = $filters["page_size"];
+        $current_page = $filters["current_page"] ?? "1";
+        $page_size = $filters["page_size"] ?? "10";
         if (!$this->isValidPagination($current_page, $page_size)) {
             throw new InvalidResourceException($request, "Please make sure the current_page and page_size are set to non-negative integer");
         }
@@ -95,8 +95,8 @@ abstract class BaseController
     {
         $filters = $request->getQueryParams();
         $parent_collection_id = $args["parent_collection_id"];
-        $current_page = $filters["current_page"];
-        $page_size = $filters["page_size"];
+        $current_page = $filters["current_page"] ?? "1";
+        $page_size = $filters["page_size"] ?? "10";
         if (!$this->isValidPagination($current_page, $page_size)) {
             throw new InvalidResourceException($request, "Please make sure the current_page and page_size are set to non-negative integer");
         }
