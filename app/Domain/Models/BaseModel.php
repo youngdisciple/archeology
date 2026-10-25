@@ -8,6 +8,8 @@ use PDO;
 use App\Helpers\Core\PDOService;
 use App\Helpers\PaginationHelper;
 use Exception;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Exceptions\UnprocessableEntityException;
 
 /**
  * A wrapper class for interacting with a MySQL DB using the PDO API.
@@ -459,5 +461,49 @@ abstract class BaseModel
         $this->validateTableName($id_column);
         $sql = "SELECT $sub_table.* FROM $sub_table JOIN $parent_table ON $sub_table.$id_column = $parent_table.$id_column WHERE $parent_table.$id_column = :parent_collection_id";
         return $this->paginate($sql, ["parent_collection_id" => $parent_collection_id]);
+    }
+
+    /**
+    * A function that validates the filters from a given set of rules.
+    * @param Request $request
+    * @param array $rules The rules parameter must take in the following shape: ["filter" (exact name) => rule (anonymous function)]
+    * @return array The validated filters
+    */
+    public function validateFilters(Request $request, array $rules)
+    {
+        $filters = $request->getQueryParams();
+
+        // check if it contains non defined filters
+        // $extra = array_diff_key($filters, $rules);
+        // if (!empty($extra)) {
+        //     throw new UnprocessableEntityException($request, "The given query filters contain unprocessable entities");
+        // }
+        //
+        // NOTE:
+        // I removed this because of two concerns:
+        // Firstly because array_diff checks differences from both sides,,,
+        // so if the user DOESN'T use ALL filters, it will result in an error.
+        // The right solution is to have $rules(keys) \ $filters(keys),
+        // i.e., a set difference to check only the extra keys from $rules.
+        // php doesn't natively have sets so this solution is of no practical
+        // relevance.
+
+        // check if any given filter doesn't comply to it's respective rule(s)
+        foreach ($filters as $filter => $v) {
+            $valid = $rules[$filter]($v) && is_string($v);
+            // WARNING: Query params can either be a string or an array.
+            // To my knowledge, there isn't any array parameters in our case
+            // so I avoid repeating ourselves by doing the is_string check here
+            // rather than in all filter rules.
+
+            if (!$valid) {
+                throw new UnprocessableEntityException(
+                    $request,
+                    "Invalid filter value ({$filter} => {$v})"
+                );
+            }
+        }
+
+        return $filters;
     }
 }

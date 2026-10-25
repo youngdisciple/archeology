@@ -21,3 +21,8 @@ const HEADERS_CONTENT_TYPE = "Content-Type";
 const APP_MEDIA_TYPE_JSON = "application/json";
 const APP_MEDIA_TYPE_XML = "application/xml";
 const APP_MEDIA_TYPE_YAML = "application/yaml";
+
+// regular expressions
+
+const POSITIVE_WHOLE_NUMBER = '/^[1-9]\d*$/D';
+const NON_NEGATIVE_DECIMAL_NUMBER = '/^\d+(\.\d+)?$/D';
