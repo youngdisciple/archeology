@@ -206,6 +206,43 @@ abstract class BaseModel
         return $data;
     }
 
+    /**
+     * Call this function when you want to apply name filters to your web resource by providing an SQL statement and any filter arguments (associative array) you want to set as criteria
+     * @param string $sql
+     * @param array $args
+     * @return array
+     */
+    protected function filter(string $sql, array $args, array $criteria): array
+    {
+        $placeholder = [];
+        foreach ($criteria as $column => $value) {
+            if (!isset($args[$column]) || empty($args[$column])) {
+                continue;
+            }
+            $this->validateTableName($column);
+            $value = $args[$column];
+            $sql .= match ($value) {
+                'like' => " AND $column LIKE CONCAT('%', :$column, '%')",
+                default => " AND $column = :$column",
+            };
+            $placeholder[$column] = match ($value) {
+                'int' => (int) $value,
+                'bool' => filter_var($value, FILTER_VALIDATE_BOOL) ? 1 : 0,
+                default => $args[$column]
+            };
+        }
+        return [$sql, $placeholder];
+    }
+
+    protected function sort(string $sql, array $args, array $sort_criteria)
+    {
+        $sorted = $args['sort_by'] ?? '';
+        if (!empty($sorted) && in_array($sorted, $sort_criteria, true)) {
+            $sortOrder = strtolower($args['order'] ?? 'asc') === 'desc' ? 'DESC' : 'ASC';
+            return $sql .= " ORDER BY $sorted $sortOrder";
+        }
+        return $sql;
+    }
 
     /**
      * Fetches all results from a SQL query as an array.
@@ -415,17 +452,13 @@ abstract class BaseModel
      * @param string $tableName
      * @return array
      */
-    protected function getCollection(array $filters, string $tableName): array
+    protected function getCollection(array $filters, string $tableName, array $args = [], array $sorted = []): array
     {
         $this->validateTableName($tableName);
-        $placeholder = [];
         $sql = "SELECT * FROM $tableName WHERE 1=1";
-        $rowName = $filters["name"] ?? '';
-        if (!empty($rowName)) {
-            $sql .= " AND name LIKE CONCAT('%' , :row_name , '%')";
-            $placeholder["row_name"] = $rowName;
-        }
-        return $this->paginate($sql, $placeholder);
+        [$sql, $args] = $this->filter($sql, $filters, $args);
+        $sql = $this->sort($sql, $filters, $sorted);
+        return $this->paginate($sql, $args);
     }
 
     /**
@@ -454,9 +487,9 @@ abstract class BaseModel
     protected function getSubCollection(int $parent_collection_id, string $parent_table, string $sub_table, string $id_column): array | false
     {
         $this->validateTableName($parent_table);
-        //$this->validateTableName($parent_pk);
         $this->validateTableName($sub_table);
         $this->validateTableName($id_column);
+        $placeholder = [];
         $sql = "SELECT $sub_table.* FROM $sub_table JOIN $parent_table ON $sub_table.$id_column = $parent_table.$id_column WHERE $parent_table.$id_column = :parent_collection_id";
         return $this->paginate($sql, ["parent_collection_id" => $parent_collection_id]);
     }

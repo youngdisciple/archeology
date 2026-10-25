@@ -60,6 +60,7 @@ abstract class BaseController
         $filters = $request->getQueryParams();
         $current_page = $filters["current_page"] ?? "1";
         $page_size = $filters["page_size"] ?? "10";
+        $name = $filters["name"] ?? "";
         if (!$this->isValidPagination($current_page, $page_size)) {
             throw new InvalidResourceException($request, "Please make sure the current_page and page_size are set to non-negative integer");
         }
@@ -92,6 +93,15 @@ abstract class BaseController
         return $this->renderJson($response, $collection);
     }
 
+    /**
+     * A reusable function that gets a resource's relationship sub-collection  from a specific table name using the parent table id and the relational id from th child table
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @param string $model_func
+     * @throws InvalidResourceException
+     * @return Response
+     */
     protected function handleGetSubCollection(Request $request, Response $response, array $args, string $model_func)
     {
         $filters = $request->getQueryParams();
