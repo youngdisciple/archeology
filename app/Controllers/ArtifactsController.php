@@ -16,29 +16,30 @@ class ArtifactsController extends BaseController
 
     // Returns a collection of artifacts
     public function index(Request $request, Response $response): Response {
-        $filters = $request->getQueryParams();
+        // filters and sorting
+        $params = $request->getQueryParams();
 
-        // TODO: sorting
-
-        if (!empty($filters)) {
+        if (!empty($params)) {
             $this->artifactsModel->setPaginationOptions(
-                $filters['page'] ?? null,
-                $filters['page_size'] ?? null
+                $params['page'] ?? null,
+                $params['page_size'] ?? null
             );
 
             $rules = [
-                "artifact_name" => fn($v) => true, // No rules, free pass
+                "artifact_name" => fn() => true, // No rules, free pass
                 "under_estimated_value" => fn($v) => preg_match(NON_NEGATIVE_DECIMAL_NUMBER, $v),
                 "over_estimated_value" => fn($v) => preg_match(NON_NEGATIVE_DECIMAL_NUMBER, $v),
-                "artifact_type" => fn($v) => true,
+                "artifact_type" => fn() => true,
                 "museum_id" => fn($v) => preg_match(POSITIVE_WHOLE_NUMBER, $v),
-                "condition" => fn($v) => in_array($v, ["Mint", "Excellent", "Good", "Fair", "Poor"]),
+                "condition" => fn($v) => in_array($v, ["mint", "excellent", "good", "fair", "poor"]),
+                "sort_by" => fn($v) => in_array($v, ['artifact_id', 'artifact_name', 'estimated_value', 'condition']),
+                'order' => fn($v) => in_array($v, ['asc', 'desc'])
             ];
 
-            $filters = ValidationHelper::validateFilters($request, $rules);
+            $params = ValidationHelper::validateParams($request, $rules);
         }
 
-        $artifacts = $this->artifactsModel->getArtifacts($filters);
+        $artifacts = $this->artifactsModel->getArtifacts($params);
 
         return $this->renderJson($response, $artifacts);
     }

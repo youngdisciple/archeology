@@ -10,19 +10,17 @@ class ArtifactsModel extends BaseModel
     // @return array
     function getArtifacts(array $filters): array
     {
+        $sort_by = $filters['sort_by'] ?? 'artifact_id';
+
+        // NOTE: conditon is a sql term so it needs backticks
+        if ($sort_by === 'condition') $sort_by = '`condition`';
+
+        $order = $filters['order'] ?? 'ASC';
+
         $sql = "SELECT * FROM artifacts WHERE 1 = 1";
         $conditions = [];
 
-        // NOTE: Filter by id is listed on the filtering table in the document
-        // but will be dropped (the show method handles that)
-
-
-        // input : filters >> [
-        //      over_estimated_value => 2
-        //      under_estimated_value => 200
-        // ]
-        //
-        // output the respective sql query to append
+        // TODO: Sorting
 
         $sqlQueries = [
             'artifact_name' => "artifact_name LIKE CONCAT('%', :artifact_name, '%')",
@@ -30,19 +28,22 @@ class ArtifactsModel extends BaseModel
             'under_estimated_value' => "estimated_value <= :over_estimated_value",
             'artifact_type' => "artifact_type = LIKE CONCAT('%', :artifact_type, '%')",
             'museum_id' => "museum_id = :museum_id",
-            'condition' => "condition = :condition"
+            'condition' => "`condition` = :condition" // NOTE: backticks
         ];
 
         // the filters received are already validated,,,
         foreach ($filters as $k => $v) {
+            if (!isset($sqlQueries[$k])) continue; //either a sort/order key, or an unknown key
+
             $sql .= " AND {$sqlQueries[$k]}";
             $conditions[$k] = $v;
         }
 
+        $sql .= " ORDER BY {$sort_by} {$order}";
+
         return $this->paginate($sql, $conditions);
     }
 
-    // TODO:
     function getArtifactsById(int $artifact_id): array | False
     {
         $sql = "SELECT * FROM artifacts WHERE artifact_id = :artifact_id";
