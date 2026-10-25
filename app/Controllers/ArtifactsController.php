@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Domain\Models\ArtifactsModel;
+use App\Validation\ValidationHelper;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Exception\HttpBadRequestException;
@@ -13,11 +14,11 @@ class ArtifactsController extends BaseController
     public function __construct( private ArtifactsModel $artifactsModel ) {}
 
 
-    // TODO:
-    //
     // Returns a collection of artifacts
     public function index(Request $request, Response $response): Response {
         $filters = $request->getQueryParams();
+
+        // TODO: sorting
 
         if (!empty($filters)) {
             $this->artifactsModel->setPaginationOptions(
@@ -34,7 +35,7 @@ class ArtifactsController extends BaseController
                 "condition" => fn($v) => in_array($v, ["Mint", "Excellent", "Good", "Fair", "Poor"]),
             ];
 
-            $filters = $this->artifactsModel->validateFilters($request, $rules);
+            $filters = ValidationHelper::validateFilters($request, $rules);
         }
 
         $artifacts = $this->artifactsModel->getArtifacts($filters);
@@ -42,8 +43,6 @@ class ArtifactsController extends BaseController
         return $this->renderJson($response, $artifacts);
     }
 
-    // TODO:
-    //
     // Returns an artifact singleton (from id)
     public function show(Request $request, Response $response, array $args): Response {
         $artifact_id = $args['artifact_id'];
