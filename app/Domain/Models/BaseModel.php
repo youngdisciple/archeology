@@ -408,10 +408,10 @@ abstract class BaseModel
      * @param int $records_per_page The number of records to include per page.
      * @return void
      */
-    public function setPaginationOptions(int $current_page, int $records_per_page): void
+    public function setPaginationOptions(?int $current_page, ?int $records_per_page): void
     {
-        $this->current_page = $current_page;
-        $this->records_per_page = $records_per_page;
+        $this->current_page = $current_page ?? $this->current_page;
+        $this->records_per_page = $records_per_page ?? $this->records_per_page;
     }
 
     /**
