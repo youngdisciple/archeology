@@ -101,7 +101,7 @@ CREATE TABLE artifacts (
     estimated_value DECIMAL(14,2) CHECK (estimated_value IS NULL OR estimated_value >= 0),
     artifact_type   VARCHAR(50),
     museum_id       INT,
-    `condition`     VARCHAR(50),   -- CONDITION is a reserved word in MariaDB: always use backticks
+    `condition`     ENUM('mint', 'excellent', 'good', 'fair', 'poor'),   -- CONDITION is a reserved word in MariaDB: always use backticks
     material        VARCHAR(100),
     weight_in_g     DECIMAL(10,2) CHECK (weight_in_g  IS NULL OR weight_in_g  >= 0),
     height_in_cm    DECIMAL(8,2)  CHECK (height_in_cm IS NULL OR height_in_cm >= 0),

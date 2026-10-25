@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Controllers\AboutController;
+use App\Controllers\MuseumController;
 use App\Controllers\SitesController;
+use App\Controllers\ArtifactsController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -16,10 +18,6 @@ return static function (Slim\App $app): void {
     //* ROUTE: GET /
     $app->get('/', [AboutController::class, 'handleAboutWebService']);
 
-    //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
-    //* ROUTE: GET /players
-    //$app->get('/players', [PlayersController::class, 'handleGetPlayers']);
-
     //* ROUTE: GET /ping
     $app->get('/ping', function (Request $request, Response $response, $args) {
 
@@ -30,6 +28,14 @@ return static function (Slim\App $app): void {
         $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR));
         return $response;
     });
+
+    //* Museum routes
+    $app->get('/museums', [MuseumController::class, 'handleGetMuseums']);
+    $app->get('/museums/{collection_id}', [MuseumController::class, 'handleGetMuseumById']);
+    $app->get('/museums/{parent_collection_id}/scientists', [MuseumController::class, 'handleGetMuseumScientist']);
+    $app->get('/museums/{parent_collection_id}/artifacts', [MuseumController::class, 'handleGetMuseumArtifact']);
+    
+    $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
 
     // Example route to test error handling.
     $app->get('/error', function (Request $request, Response $response, $args) {
@@ -55,4 +61,9 @@ return static function (Slim\App $app): void {
     $app->get('/sites/{parent_collection_id}/periods', [SitesController::class, 'handleGetSitePeriod']);
     //!POST ROUTES FOR SITES
     $app->post('/sites', [SitesController::class, 'handleCreateSites']);
+
+    //* ROUTES FOR ARTIFACTS COLLECTION
+    // GET ROUTES FOR ARTIFACTS
+    $app->get('/artifacts', [ArtifactsController::class, 'index']);
+    $app->get('/artifacts/{artifact_id}', [ArtifactsController::class, 'show']);
 };

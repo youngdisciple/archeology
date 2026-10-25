@@ -68,4 +68,22 @@ class DateTimeHelper
     {
         return self::now(self::Y_M_D_H_M);
     }
+
+    /**
+     * Validates that a date follows the YYYY-MM-DD format
+     * and represents a real calendar date.
+     *
+     * @param string $date
+     * @return bool
+     */
+    public static function isValidDate(string $date): bool
+    {
+        $parsedDate = \DateTimeImmutable::createFromFormat(
+            '!Y-m-d',
+            $date
+        );
+
+        return $parsedDate !== false
+            && $parsedDate->format('Y-m-d') === $date;
+    }
 }
