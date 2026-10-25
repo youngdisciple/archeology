@@ -418,208 +418,34 @@ abstract class BaseModel
      * A reusable function that uses an SQL query to get all tables about a collection
      * @param array $filters
      * @param string $tableName
-     * @param string $nameColumn
+     * @param array $filterConfig
      * @param array $sortableFields
-     * @param array $filterableFields
      * @return array
      */
-
-    protected function getCollection(array $filters, string $tableName, string $nameColumn = 'name', array $sortableFields = [], array $filterableFields = [], array $dateFields = [], array $booleanFields = []
+    protected function getCollection(array $filters, string $tableName, array $filterConfig = [], array $sortableFields = []
     ): array {
+
         $this->validateTableName($tableName);
-        $this->validateTableName($nameColumn);
 
-        $placeholder = [];
         $sql = "SELECT * FROM $tableName WHERE 1=1";
+        $params = [];
 
-        $rowName = $filters[$nameColumn] ?? '';
+        $this->applyFilters(
+            $sql,
+            $params,
+            $filters,
+            $filterConfig,
+            $tableName
+        );
 
-        if ($rowName !== '') {
-            $sql .= " AND $nameColumn LIKE CONCAT('%', :row_name, '%')";
-            $placeholder['row_name'] = $rowName;
-        }
+        $this->applySorting(
+            $sql,
+            $filters,
+            $sortableFields,
+            $tableName
+        );
 
-        // Filter by allowed string columns
-        foreach ($filterableFields as $column) {
-
-            $this->validateTableName($column);
-
-            $operators = [
-                '' => 'contains',
-                '_equals' => 'equals',
-                '_startsWith' => 'startsWith',
-                '_endsWith' => 'endsWith'
-            ];
-
-            foreach ($operators as $suffix => $operation) {
-
-                $parameter = $column . $suffix;
-
-                if (!array_key_exists($parameter, $filters)) {
-                    continue;
-                }
-
-                $value = $filters[$parameter];
-
-                if (!is_string($value) || $value === '') {
-                    throw new \InvalidArgumentException(
-                        "Invalid value for $parameter."
-                    );
-                }
-
-                $placeholderName = $parameter;
-
-                switch ($operation) {
-                    case 'equals':
-                        $sql .= " AND $column = :$placeholderName";
-                        $placeholder[$placeholderName] = $value;
-                        break;
-
-                    case 'startsWith':
-                        $sql .= " AND $column LIKE :$placeholderName";
-                        $placeholder[$placeholderName] = $value . '%';
-                        break;
-
-                    case 'endsWith':
-                        $sql .= " AND $column LIKE :$placeholderName";
-                        $placeholder[$placeholderName] = '%' . $value;
-                        break;
-
-                    default:
-                        $sql .= " AND $column LIKE :$placeholderName";
-                        $placeholder[$placeholderName] = '%' . $value . '%';
-                        break;
-                }
-            }
-        }
-        // Filter by allowed date columns
-        foreach ($dateFields as $column) {
-
-            $this->validateTableName($column);
-
-            $afterKey = $column . '_after';
-            $beforeKey = $column . '_before';
-            $betweenKey = $column . '_between';
-
-            if (isset($filters[$betweenKey])) {
-
-                if (!is_string($filters[$betweenKey])) {
-                    throw new \InvalidArgumentException(
-                        "Invalid date range for $betweenKey."
-                    );
-                }
-
-                $dates = explode(',', $filters[$betweenKey]);
-
-                if (count($dates) !== 2) {
-                    throw new \InvalidArgumentException(
-                        "Invalid date range."
-                    );
-                }
-
-                $startDate = trim($dates[0]);
-                $endDate = trim($dates[1]);
-
-                // Validate both dates individually.
-                if (
-                    !DateTimeHelper::isValidDate($startDate) ||
-                    !DateTimeHelper::isValidDate($endDate)
-                ) {
-                    throw new \InvalidArgumentException(
-                        "Invalid date format for $betweenKey. Use YYYY-MM-DD."
-                    );
-                }
-
-                // Ensure the date range is chronological.
-                if ($startDate > $endDate) {
-                    throw new \InvalidArgumentException(
-                        "The start date cannot be after the end date."
-                    );
-                }
-
-                $sql .= " AND $column BETWEEN :date_start AND :date_end";
-                $placeholder['date_start'] = $startDate;
-                $placeholder['date_end'] = $endDate;
-
-            } else {
-
-                if (isset($filters[$afterKey])) {
-
-                    $date = $filters[$afterKey];
-
-                    if (!is_string($date) || !DateTimeHelper::isValidDate($date)) {
-                        throw new \InvalidArgumentException(
-                            "Invalid date format for $afterKey. Use YYYY-MM-DD."
-                        );
-                    }
-
-                    $sql .= " AND $column >= :date_after";
-                    $placeholder['date_after'] = $date;
-                }
-
-                if (isset($filters[$beforeKey])) {
-
-                    $date = $filters[$beforeKey];
-
-                    if (!is_string($date) || !DateTimeHelper::isValidDate($date)) {
-                        throw new \InvalidArgumentException(
-                            "Invalid date format for $beforeKey. Use YYYY-MM-DD."
-                        );
-                    }
-
-                    $sql .= " AND $column <= :date_before";
-                    $placeholder['date_before'] = $date;
-                }
-            }
-        }
-
-        // Filter by allowed boolean columns
-        foreach ($booleanFields as $parameter => $column) {
-
-            $this->validateTableName($column);
-
-            if (!array_key_exists($parameter, $filters)) {
-                continue;
-            }
-
-            $value = $filters[$parameter];
-
-            if (!is_string($value) ||
-                !in_array(strtolower($value), ['true', 'false', '1', '0'], true)) {
-                throw new \InvalidArgumentException(
-                    "Invalid boolean value for $parameter."
-                );
-            }
-
-            $hasValue = in_array(strtolower($value), ['true', '1'], true);
-
-            if ($hasValue) {
-                $sql .= " AND $column IS NOT NULL AND $column <> ''";
-            } else {
-                $sql .= " AND ($column IS NULL OR $column = '')";
-            }
-        }
-
-        // Sort by an allowed field
-        $sort = $filters['sort'] ?? '';
-
-        if ($sort !== '') {
-            if (!is_string($sort)) {
-                throw new \InvalidArgumentException("Invalid sorting parameter.");
-            }
-
-            $descending = str_starts_with($sort, '-');
-            $sortColumn = $descending ? substr($sort, 1) : $sort;
-
-            if (!in_array($sortColumn, $sortableFields, true)) {
-                throw new \InvalidArgumentException("Invalid sorting field.");
-            }
-
-            $direction = $descending ? 'DESC' : 'ASC';
-            $sql .= " ORDER BY $sortColumn $direction";
-        }
-
-        return $this->paginate($sql, $placeholder);
+        return $this->paginate($sql, $params);
     }
 
     /**
@@ -639,19 +465,297 @@ abstract class BaseModel
 
     /**
      * A reusable function that gets a collection's sub-collection based on that collection's unique ID
-     * @param int $parent_collection_id
-     * @param string $parent_table
-     * @param string $sub_table
-     * @param string $id_column
-     * @return array
+     *
      */
-    protected function getSubCollection(int $parent_collection_id, string $parent_table, string $sub_table, string $id_column): array | false
-    {
+    protected function getSubCollection(int $parent_collection_id, string $parent_table, string $sub_table, string $id_column, array $filters = [],
+         array $filterConfig = [], array $sortableFields = []
+    ): array|false {
+
         $this->validateTableName($parent_table);
-        //$this->validateTableName($parent_pk);
         $this->validateTableName($sub_table);
         $this->validateTableName($id_column);
-        $sql = "SELECT $sub_table.* FROM $sub_table JOIN $parent_table ON $sub_table.$id_column = $parent_table.$id_column WHERE $parent_table.$id_column = :parent_collection_id";
-        return $this->paginate($sql, ["parent_collection_id" => $parent_collection_id]);
+
+        $sql = "SELECT $sub_table.*
+                FROM $sub_table
+                JOIN $parent_table
+                    ON $sub_table.$id_column = $parent_table.$id_column
+                WHERE $parent_table.$id_column = :parent_collection_id";
+
+        $params = [
+            'parent_collection_id' => $parent_collection_id
+        ];
+
+        $this->applyFilters(
+            $sql,
+            $params,
+            $filters,
+            $filterConfig,
+            $sub_table
+        );
+
+        $this->applySorting(
+            $sql,
+            $filters,
+            $sortableFields,
+            $sub_table
+        );
+
+        return $this->paginate($sql, $params);
+    }
+
+    /**
+     * Applies validated filters to an SQL query.
+     *
+     * @param string $sql The SQL query to modify.
+     * @param array $params Bound SQL parameters.
+     * @param array $filters Request query parameters.
+     * @param array $config Allowed filters and their rules.
+     * @param string $alias SQL table name or alias.
+     * @return void
+     */
+    protected function applyFilters(string &$sql, array &$params, array $filters, array $config, string $alias
+    ): void {
+
+        $this->validateTableName($alias);
+
+        foreach ($config as $parameter => $rule) {
+
+            if (!array_key_exists($parameter, $filters)) {
+                continue;
+            }
+
+            $value = $filters[$parameter];
+            $column = $rule['column'];
+            $type = $rule['type'];
+
+            $this->validateTableName($column);
+
+            if (!is_string($value) || $value === '') {
+                throw new \InvalidArgumentException(
+                    "Invalid value for $parameter."
+                );
+            }
+
+            $placeholder = 'filter_' . $parameter;
+
+            switch ($type) {
+
+                case 'exact':
+                case 'enum':
+
+                    if ($type === 'enum' &&
+                        !in_array($value, $rule['allowed'], true)) {
+                        throw new \InvalidArgumentException(
+                            "Invalid option for $parameter."
+                        );
+                    }
+
+                    $sql .= " AND $alias.$column = :$placeholder";
+                    $params[$placeholder] = $value;
+                    break;
+
+                case 'contains':
+                case 'startsWith':
+                case 'endsWith':
+
+                    // Escape SQL LIKE wildcards.
+                    $escaped = str_replace(
+                        ['!', '%', '_'],
+                        ['!!', '!%', '!_'],
+                        $value
+                    );
+
+                    if ($type === 'contains') {
+                        $escaped = '%' . $escaped . '%';
+                    } elseif ($type === 'startsWith') {
+                        $escaped .= '%';
+                    } else {
+                        $escaped = '%' . $escaped;
+                    }
+
+                    $sql .= " AND $alias.$column LIKE :$placeholder ESCAPE '!'";
+                    $params[$placeholder] = $escaped;
+                    break;
+
+                case 'boolean':
+
+                    $boolValue = strtolower($value);
+
+                    if (!in_array(
+                        $boolValue,
+                        ['true', 'false', '1', '0'],
+                        true
+                    )) {
+                        throw new \InvalidArgumentException(
+                            "Invalid boolean for $parameter."
+                        );
+                    }
+
+                    $bool = in_array(
+                        $boolValue,
+                        ['true', '1'],
+                        true
+                    );
+
+                    $sql .= " AND $alias.$column = :$placeholder";
+                    $params[$placeholder] = (int) $bool;
+                    break;
+
+                case 'presence':
+
+                    $boolValue = strtolower($value);
+
+                    if (!in_array(
+                        $boolValue,
+                        ['true', 'false', '1', '0'],
+                        true
+                    )) {
+                        throw new \InvalidArgumentException(
+                            "Invalid boolean for $parameter."
+                        );
+                    }
+
+                    $hasValue = in_array(
+                        $boolValue,
+                        ['true', '1'],
+                        true
+                    );
+
+                    if ($hasValue) {
+                        $sql .= " AND $alias.$column IS NOT NULL
+                                AND $alias.$column <> ''";
+                    } else {
+                        $sql .= " AND ($alias.$column IS NULL
+                                OR $alias.$column = '')";
+                    }
+                    break;
+
+                case 'min':
+                case 'max':
+
+                    if (!ctype_digit($value)) {
+                        throw new \InvalidArgumentException(
+                            "Invalid number for $parameter."
+                        );
+                    }
+
+                    $number = (int) $value;
+
+                    if ($number < $rule['minAllowed'] ||
+                        $number > $rule['maxAllowed']) {
+                        throw new \InvalidArgumentException(
+                            "Value out of range for $parameter."
+                        );
+                    }
+
+                    $operator = $type === 'min' ? '>=' : '<=';
+
+                    $sql .= " AND $alias.$column $operator :$placeholder";
+                    $params[$placeholder] = $number;
+                    break;
+
+                case 'date_after':
+                case 'date_before':
+
+                    if (!DateTimeHelper::isValidDate($value)) {
+                        throw new \InvalidArgumentException(
+                            "Invalid date for $parameter. Use YYYY-MM-DD."
+                        );
+                    }
+
+                    $operator = $type === 'date_after' ? '>=' : '<=';
+
+                    $sql .= " AND $alias.$column $operator :$placeholder";
+                    $params[$placeholder] = $value;
+                    break;
+
+                case 'date_between':
+
+                    $dates = explode(',', $value);
+
+                    if (count($dates) !== 2) {
+                        throw new \InvalidArgumentException(
+                            "Invalid date range for $parameter."
+                        );
+                    }
+
+                    $startDate = trim($dates[0]);
+                    $endDate = trim($dates[1]);
+
+                    if (!DateTimeHelper::isValidDate($startDate) ||
+                        !DateTimeHelper::isValidDate($endDate)) {
+                        throw new \InvalidArgumentException(
+                            "Invalid dates for $parameter. Use YYYY-MM-DD."
+                        );
+                    }
+
+                    if ($startDate > $endDate) {
+                        throw new \InvalidArgumentException(
+                            "Start date cannot be after end date."
+                        );
+                    }
+
+                    $startKey = $placeholder . '_start';
+                    $endKey = $placeholder . '_end';
+
+                    $sql .= " AND $alias.$column
+                            BETWEEN :$startKey AND :$endKey";
+
+                    $params[$startKey] = $startDate;
+                    $params[$endKey] = $endDate;
+                    break;
+
+                default:
+                    throw new \InvalidArgumentException(
+                        "Unsupported filter type: $type."
+                    );
+            }
+        }
+    }
+
+
+    /**
+     * Applies sorting to an SQL query using approved columns.
+     *
+     * @param string $sql SQL query to modify.
+     * @param array $filters Request query parameters.
+     * @param array $sortableFields Approved columns.
+     * @param string $alias SQL table name or alias.
+     * @return void
+     */
+    protected function applySorting(
+        string &$sql,
+        array $filters,
+        array $sortableFields,
+        string $alias
+    ): void {
+
+        if (!array_key_exists('sort', $filters)) {
+            return;
+        }
+
+        $sort = $filters['sort'];
+
+        if (!is_string($sort) || $sort === '') {
+            throw new \InvalidArgumentException(
+                "Invalid sorting parameter."
+            );
+        }
+
+        $descending = str_starts_with($sort, '-');
+        $column = $descending ? substr($sort, 1) : $sort;
+
+        if (!in_array($column, $sortableFields, true)) {
+            throw new \InvalidArgumentException(
+                "Invalid sorting field."
+            );
+        }
+
+        $this->validateTableName($alias);
+        $this->validateTableName($column);
+
+        $direction = $descending ? 'DESC' : 'ASC';
+
+        $sql .= " ORDER BY $alias.$column $direction";
     }
 }
