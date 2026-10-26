@@ -127,8 +127,8 @@ class ScientistsModel extends BaseModel
         return $this->getSubCollection(
             $scientist_id,
             'scientist',
-            'excavation',
-            'scientist',
+            'excavations',
+            'scientist_id',
             $filters,
             $filterConfig,
             $sortableFields

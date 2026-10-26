@@ -25,6 +25,10 @@ return static function (Slim\App $app): void {
     //* Scientist Routes:
     //* ROUTE: GET /scientists
     $app->get('/scientists', [ScientistsController::class, 'handleGetScientists']);
+    //* ROUTE: GET /scientists/{id}
+    $app->get('/scientists/{collection_id}', [ScientistsController::class, 'handleGetScientistById']);
+    //* ROUTE: GET /scientists/{id}/excavations
+    $app->get('/scientists/{parent_collection_id}/excavations', [ScientistsController::class, 'handleGetScientistExcavation']);
     //* ROUTE: GET /scientists
     $app->post('/scientists', [ScientistsController::class, 'handleCreateScientists']);
 
