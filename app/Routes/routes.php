@@ -9,7 +9,7 @@ use App\Controllers\ArtifactsController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-
+use App\Controllers\ScientistsController;
 
 return static function (Slim\App $app): void {
 
@@ -17,6 +17,20 @@ return static function (Slim\App $app): void {
 
     //* ROUTE: GET /
     $app->get('/', [AboutController::class, 'handleAboutWebService']);
+
+    //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
+    //* ROUTE: GET /players
+    //$app->get('/players', [PlayersController::class, 'handleGetPlayers']);
+
+    //* Scientist Routes:
+    //* ROUTE: GET /scientists
+    $app->get('/scientists', [ScientistsController::class, 'handleGetScientists']);
+    //* ROUTE: GET /scientists/{id}
+    $app->get('/scientists/{collection_id}', [ScientistsController::class, 'handleGetScientistById']);
+    //* ROUTE: GET /scientists/{id}/excavations
+    $app->get('/scientists/{parent_collection_id}/excavations', [ScientistsController::class, 'handleGetScientistExcavation']);
+    //* ROUTE: GET /scientists
+    $app->post('/scientists', [ScientistsController::class, 'handleCreateScientists']);
 
     //* ROUTE: GET /ping
     $app->get('/ping', function (Request $request, Response $response, $args) {
@@ -34,7 +48,7 @@ return static function (Slim\App $app): void {
     $app->get('/museums/{collection_id}', [MuseumController::class, 'handleGetMuseumById']);
     $app->get('/museums/{parent_collection_id}/scientists', [MuseumController::class, 'handleGetMuseumScientist']);
     $app->get('/museums/{parent_collection_id}/artifacts', [MuseumController::class, 'handleGetMuseumArtifact']);
-    
+
     $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
 
     // Example route to test error handling.

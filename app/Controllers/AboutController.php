@@ -80,6 +80,12 @@ class AboutController extends BaseController
                         'methods' => [
                             'GET' => 'Show a specific scientist'
                         ]
+                    ],
+                    [
+                        'path' => '/scientists/{scientist_id}/excavations',
+                        'methods' => [
+                            'GET' => 'Shows all excavations a scientist was involved in'
+                        ]
                     ]
                 ]
             ]
