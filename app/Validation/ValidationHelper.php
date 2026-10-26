@@ -76,7 +76,7 @@ class ValidationHelper
      * An array is "associative" if it doesn't have sequential numerical keys beginning with zero.
      * Note that an array in PHP can be either sequential or associative.
      *
-     * @param  array  $array the array to be verified.
+     * @param  array $array the array to be verified.
      * @return bool
      */
     public static function isAssoc(array $input): bool
@@ -114,11 +114,11 @@ class ValidationHelper
     }
 
     /**
-    * A function that validates the filters from a given set of rules.
-    * @param Request $request
-    * @param array $rules The rules parameter must take in the following shape: ["filter" (exact name) => rule (anonymous function)]
-    * @return array The validated filters
-    */
+     * A function that validates the filters from a given set of rules.
+     * @param Request $request
+     * @param array $rules The rules parameter must take in the following shape: ["filter" (exact name) => rule (anonymous function)]
+     * @return array The validated filters
+     */
     public static function validateParams(Request $request, array $rules, bool $case_sensitive = false)
     {
         $params = $request->getQueryParams();
