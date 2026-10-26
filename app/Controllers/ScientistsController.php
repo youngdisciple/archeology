@@ -2,13 +2,17 @@
 
 namespace App\Controllers;
 
+use App\Domain\Models\ScientistsModel;
 use App\Domain\Services\ScientistsService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ScientistsController extends BaseController
 {
-    public function __construct(private ScientistsService $scientists_service) {}
+    public function __construct(private ScientistsModel $scientists_model, private ScientistsService $scientists_service)
+    {
+        parent::__construct($scientists_model);
+    }
 
     public function handleGetScientists(Request $request, Response $response): Response
     {
