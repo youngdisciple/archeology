@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Domain\Models\BaseModel;
+use App\Exceptions\UnprocessableEntityException;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Exceptions\InvalidResourceException;
 use App\Validation\ValidationHelper;
@@ -42,12 +43,16 @@ abstract class BaseController
             (int)$current_page,
             (int)$page_size
         );
-        $collection = $this->base_model->$model_func($filters);
+        try {
+            $collection = $this->base_model->$model_func($filters);
+        } catch (\InvalidArgumentException $e) {
+            throw new UnprocessableEntityException($request, $e->getMessage());
+        }
         return $this->renderJson($response, $collection);
     }
 
     /**
-     *A reusable function that gets a singleton resource from a specific table name based on the ID
+     *A reusable function that gets a singleton resource from a specific table name based on the ID and specified string function that handles the SQL statements
      * @param Request $request
      * @param Response $response
      * @param array $args
@@ -67,6 +72,15 @@ abstract class BaseController
         return $this->renderJson($response, $collection);
     }
 
+    /**
+     * A reusable function that allows its children to send requests and get responses about a sub-collection of a collection so long as the model function string name is specified
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @param string $model_func
+     * @throws InvalidResourceException
+     * @return Response
+     */
     protected function handleGetSubCollection(Request $request, Response $response, array $args, string $model_func)
     {
         $filters = $request->getQueryParams();
@@ -84,7 +98,11 @@ abstract class BaseController
         if (!ValidationHelper::isValidId($parent_collection_id)) {
             throw new InvalidResourceException($request, "The ID $parent_collection_id was invalid! It must be a whole, non-negative integer.");
         }
-        $sub_collection = $this->base_model->$model_func($filters, (int) $parent_collection_id);
+        try {
+            $sub_collection = $this->base_model->$model_func($filters, (int) $parent_collection_id);
+        } catch (\InvalidArgumentException $e) {
+            throw new UnprocessableEntityException($request, $e->getMessage());
+        }
         if ($sub_collection === false) {
             throw new InvalidResourceException($request, "There was no such ID record for $parent_collection_id");
         }

@@ -422,7 +422,11 @@ abstract class BaseModel
      * @param array $sortableFields
      * @return array
      */
-    protected function getCollection(array $filters, string $tableName, array $filterConfig = [], array $sortableFields = []
+    protected function getCollection(
+        array $filters,
+        string $tableName,
+        array $filterConfig = [],
+        array $sortableFields = []
     ): array {
 
         $this->validateTableName($tableName);
@@ -467,8 +471,14 @@ abstract class BaseModel
      * A reusable function that gets a collection's sub-collection based on that collection's unique ID
      *
      */
-    protected function getSubCollection(int $parent_collection_id, string $parent_table, string $sub_table, string $id_column, array $filters = [],
-         array $filterConfig = [], array $sortableFields = []
+    protected function getSubCollection(
+        int $parent_collection_id,
+        string $parent_table,
+        string $sub_table,
+        string $id_column,
+        array $filters = [],
+        array $filterConfig = [],
+        array $sortableFields = []
     ): array|false {
 
         $this->validateTableName($parent_table);
@@ -513,7 +523,12 @@ abstract class BaseModel
      * @param string $alias SQL table name or alias.
      * @return void
      */
-    protected function applyFilters(string &$sql, array &$params, array $filters, array $config, string $alias
+    protected function applyFilters(
+        string &$sql,
+        array &$params,
+        array $filters,
+        array $config,
+        string $alias
     ): void {
 
         $this->validateTableName($alias);
@@ -543,8 +558,10 @@ abstract class BaseModel
                 case 'exact':
                 case 'enum':
 
-                    if ($type === 'enum' &&
-                        !in_array($value, $rule['allowed'], true)) {
+                    if (
+                        $type === 'enum' &&
+                        !in_array($value, $rule['allowed'], true)
+                    ) {
                         throw new \InvalidArgumentException(
                             "Invalid option for $parameter."
                         );
@@ -641,8 +658,10 @@ abstract class BaseModel
 
                     $number = (int) $value;
 
-                    if ($number < $rule['minAllowed'] ||
-                        $number > $rule['maxAllowed']) {
+                    if (
+                        $number < $rule['minAllowed'] ||
+                        $number > $rule['maxAllowed']
+                    ) {
                         throw new \InvalidArgumentException(
                             "Value out of range for $parameter."
                         );
@@ -682,8 +701,10 @@ abstract class BaseModel
                     $startDate = trim($dates[0]);
                     $endDate = trim($dates[1]);
 
-                    if (!DateTimeHelper::isValidDate($startDate) ||
-                        !DateTimeHelper::isValidDate($endDate)) {
+                    if (
+                        !DateTimeHelper::isValidDate($startDate) ||
+                        !DateTimeHelper::isValidDate($endDate)
+                    ) {
                         throw new \InvalidArgumentException(
                             "Invalid dates for $parameter. Use YYYY-MM-DD."
                         );
