@@ -22,9 +22,9 @@ return static function (Slim\App $app): void {
     //* ROUTE: GET /players
     //$app->get('/players', [PlayersController::class, 'handleGetPlayers']);
 
+    //* Scientist Routes:
     //* ROUTE: GET /scientists
     $app->get('/scientists', [ScientistsController::class, 'handleGetScientists']);
-
     //* ROUTE: GET /scientists
     $app->post('/scientists', [ScientistsController::class, 'handleCreateScientists']);
 
