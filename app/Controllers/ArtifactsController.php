@@ -14,7 +14,13 @@ class ArtifactsController extends BaseController
     public function __construct( private ArtifactsModel $artifactsModel ) {}
 
 
-    // Returns a collection of artifacts
+    /**
+    * Get a collection of artifacts
+    *
+    * @param Request $request
+    * @param Response $response
+    * @return Response
+    */
     public function index(Request $request, Response $response): Response {
         // filters and sorting
         $params = $request->getQueryParams();
@@ -44,7 +50,14 @@ class ArtifactsController extends BaseController
         return $this->renderJson($response, $artifacts);
     }
 
-    // Returns an artifact singleton (from id)
+    /**
+    * Get a an artifact singleton from id
+    *
+    * @param Request $request
+    * @param Response $response
+    * @param array $args
+    * @return Response
+    */
     public function show(Request $request, Response $response, array $args): Response {
         $artifact_id = $args['artifact_id'];
 

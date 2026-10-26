@@ -4,10 +4,12 @@ namespace App\Domain\Models;
 
 class ArtifactsModel extends BaseModel
 {
-    // Takes filters (optional) and returns a collection of artifacts
-    //
-    // @param array $filters
-    // @return array
+    /**
+    * Takes filters (optional) and returns a collection of artifacts
+    *
+    * @param array $filters
+    * @return array
+    */
     function getArtifacts(array $filters): array
     {
         $sort_by = $filters['sort_by'] ?? 'artifact_id';
@@ -44,6 +46,12 @@ class ArtifactsModel extends BaseModel
         return $this->paginate($sql, $conditions);
     }
 
+    /**
+    * Get a specific artifact by its artifact_id
+    *
+    * @param int $artifact_id
+    * @return array | False
+    */
     function getArtifactsById(int $artifact_id): array | False
     {
         $sql = "SELECT * FROM artifacts WHERE artifact_id = :artifact_id";
