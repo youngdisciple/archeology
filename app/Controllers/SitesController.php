@@ -38,8 +38,15 @@ class SitesController extends BaseController
 
 
     //*callbacks for POST
+    /**
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
     public function handleCreateSites(Request $request, Response $response): Response
     {
+        echo "test";
         //*Retrieve the representation of the collection items that need to be created
         $payload = $request->getParsedBody();
         //*Pass the list of new collection items to the Service component to be validated and then inserted into the database
