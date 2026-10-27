@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Archeology API — Museums
+  title: Archeology API
   version: 0.1.0
   description: |
     OpenAPI specification for the GET endpoints of Iteration 1.
@@ -9,6 +9,7 @@ servers:
     description: Local server
 tags:
   - name: Museums
+  - name: Artifacts
 paths:
   /museums:
     get:
@@ -174,6 +175,107 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '406': { $ref: '#/components/responses/NotAcceptable' }
         '500': { $ref: '#/components/responses/ServerError' }
+  /artifacts:
+    get:
+      tags: [Artifacts]
+      operationId: listArtifacts
+      summary: List artifacts
+      description: Returns a filtered, sorted, paginated collection of artifacts. Note that all values are case-insensitive strings.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageItems'
+        - name: artifact_name
+          in: query
+          description: Partial match on artifact name.
+          schema: { type: string }
+        - name: artifact_type
+          in: query
+          description: Exact database enum value.
+          schema: { type: string }
+        - name: condition
+          in: query
+          description: Exact database enum value.
+          schema: { type: string }
+        - name: museum_id
+          in: query
+          description: Only artifacts belonging to this museum.
+          schema: { type: integer, minimum: 1 }
+        - name: over_estimated_value
+          in: query
+          description: Lower estimated value bound
+          schema: { type: number, format: float, minimum: 0 }
+        - name: below_estimated_value
+          in: query
+          description: Upper estimated value bound
+          schema: { type: number, format: float, minimum: 0 }
+        - name: sort_by
+          in: query
+          description: The response is sorted by artifact_id if no `sort_by` parameter is provided.
+          schema:
+            type: string
+            enum: [artifact_id, artifact_name, estimated_value, condition]
+        - name: order
+          in: query
+          description: The response's order is by ascending if no `order` parameter is provided.
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Artifact Collection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ArtifactCollection' }
+        '406': { $ref: '#/components/responses/NotAcceptable' }
+        '422': { $ref: '#/components/responses/UnprocessableEntity' }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /artifacts/{artifactId}:
+    get:
+      tags: [Artifacts]
+      operationId: getArtifactById
+      summary: Get an artifact by ID
+      parameters:
+        - $ref: '#/components/parameters/ArtifactId'
+      responses:
+        '200':
+          description: Artifact found.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Artifact' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '406': { $ref: '#/components/responses/NotAcceptable' }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /sites:
+    get:
+      tags: [Sites]
+      summary: Get the list of famous archeological sites
+      operationId: getSites
+      description: Returns a paginated, filterable and sortable collection of
+        archeological sites. Default sort is ascending by `site_id`.
+        String filters are case-insensitive and use "contains" matching.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/SiteNameParam"
+        - $ref: "#/components/parameters/SiteTypeParam"
+        - $ref: "#/components/parameters/DiscoveryDateParam"
+        - $ref: "#/components/parameters/MinAgeParam"
+        - $ref: "#/components/parameters/MaxAgeParam"
+        - $ref: "#/components/parameters/CountryParam"
+        - $ref: "#/components/parameters/RegionParam"
+        - $ref: "#/components/parameters/ProtectedParam"
+        - $ref: "#/components/parameters/CultureIdParam"
+        - $ref: "#/components/parameters/PeriodIdParam"
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Content
 components:
   parameters:
     MuseumId:
@@ -260,6 +362,148 @@ components:
       in: query
       description: Museum type ends with this text.
       schema: { type: string }
+    ArtifactId:
+      name: artifactId
+      in: path
+      required: true
+      description: Positive integer artifact identifier.
+      schema: { type: integer, minimum: 1 }
+      example: 1
+    PageParam:
+      name: current_page
+      in: query
+      description: Page number for pagination (starts from 1)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+        example: 1
+
+    PageSizeParam:
+      name: page_size
+      in: query
+      description: The number of items generated for each page
+      required: false
+      schema:
+        minimum: 1
+        maximum: 200
+        default: 10
+      example: 1
+
+    SiteNameParam:
+      name: site_name
+      in: query
+      description: Case-insensitive "contains" match on the site name.
+      required: false
+      schema:
+        type: string
+      example: pompeii
+
+    SiteTypeParam:
+      name: site_type
+      in: query
+      description: Case-insensitive "contains" match on the site type.
+      required: false
+      schema:
+        type: string
+      example: basilica
+
+    DiscoveryDateParam:
+      name: discovery_date
+      in: query
+      required: false
+      description: |
+        Two comma-separated dates (start,end). Each date is `YYYY-MM-DD` or
+        `YYYY-MM`. Dates cannot be in the future and start must not be after end.
+      schema:
+        type: string
+        pattern: '^\d{4}-\d{2}(-\d{2})?,\d{4}-\d{2}(-\d{2})?$'
+      example: 2006-01-22,2026-09-13
+
+    MinAgeParam:
+      name: age_min
+      in: query
+      description: Minimum estimated age in years. Cannot be negative.
+      required: false
+      schema:
+        type: number
+        minimum: 0
+        maximum: 600000000
+      example: 4000
+
+    MaxAgeParam:
+      name: age_max
+      in: query
+      description: Maximum estimated age in years. Cannot be negative.
+      required: false
+      schema:
+        type: number
+        minimum: 0
+        maximum: 600000000
+      example: 10000
+
+    CountryParam:
+      name: country
+      in: query
+      description: Case-insensitive "contains" match on the country.
+      required: false
+      schema:
+        type: string
+      example: italy
+
+    RegionParam:
+      name: region
+      in: query
+      description: Case-insensitive "contains" match on the region.
+      required: false
+      schema:
+        type: string
+      example: sicily
+
+    ProtectedParam:
+      name: is_protected
+      in: query
+      description: Filter on protected status. Accepts `true`, `false`, `1` or `0`.
+      required: false
+      schema:
+        type: string
+        enum: ["true", "false", "1", "0"]
+      example: "true"
+
+    CultureIdParam:
+      name: culture_id
+      in: query
+      description: Only sites belonging to this culture. Must be a non-negative integer.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      example: 4
+
+    PeriodIdParam:
+      name: period_id
+      in: query
+      description: Only sites belonging to this historical period. Must be a non-negative integer.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      example: 8
+
+    SiteSortParam:
+      name: sort
+      in: query
+      required: false
+      description: |
+        Field to sort by. Ascending by default; prefix with `-` for descending
+        (e.g. `-discovery_date`).
+        Sortable fields: site_name, site_type, discovery_date, estimated_age,
+        country, region, latitude, longitude, culture_id, period_id.
+      schema:
+        type: string
+        pattern: "^-?(site_name|site_type|discovery_date|estimated_age|country|region|latitude|longitude|culture_id|period_id)$"
+      example: -estimated_age
   schemas:
     Museum:
       type: object
@@ -295,6 +539,8 @@ components:
         museum_id: { type: integer }
         condition: { type: string }
         material: {type: string, nullable: true}
+        weight_in_g: { type: number, nullable: true }
+        height_in_cm: { type: number, nullable: true }
     PaginationMeta:
       type: object
       additionalProperties: true
@@ -334,28 +580,39 @@ components:
         status: { type: string}
         message: { type: string }
       required: [code, message]
+
   responses:
     BadRequest:
       description: Invalid query parameter or malformed resource ID.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          example: { code: 400, status: Error, message: Invalid query parameter. }
+          example: { code: 400, status: Error, message: Malformed resource ID. }
     NotFound:
-      description: Museum not found.
+      description: The requested resource was not found.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          example: { code: 404, status: Error, message: Museum not found. }
+          example: { code: 404, status: Error, message: Resource not found. }
+
     NotAcceptable:
       description: The requested response media type is not supported.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
           example: { code: 406, status: Error, message: Only application/json is supported. }
+
+    UnprocessableEntity:
+      description: The server understands the request syntax and format, but cannot process the contained instructions due to semantic or data validation errors.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: 422, status: Error, message: The server was unable to process the contained instructions}
+
     ServerError:
       description: Unexpected server error.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
           example: { code: 500, status: Error, message: Internal server error. }
+
