@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Archeology API
-  version: 0.1.0
+  version: 3.1.0
   description: |
     OpenAPI specification for the GET endpoints of Iteration 1.
 servers:
@@ -10,6 +10,8 @@ servers:
 tags:
   - name: Museums
   - name: Artifacts
+  - name: Scientists
+  - name: Sites
 paths:
   /museums:
     get:
@@ -18,21 +20,21 @@ paths:
       summary: List museums
       description: Returns a filtered, sorted, paginated collection of museums.
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageItems'
-        - $ref: '#/components/parameters/MuseumSort'
-        - $ref: '#/components/parameters/MuseumName'
-        - $ref: '#/components/parameters/MuseumNameEquals'
-        - $ref: '#/components/parameters/MuseumNameStartsWith'
-        - $ref: '#/components/parameters/MuseumNameEndsWith'
-        - $ref: '#/components/parameters/City'
-        - $ref: '#/components/parameters/CityEquals'
-        - $ref: '#/components/parameters/CityStartsWith'
-        - $ref: '#/components/parameters/CityEndsWith'
-        - $ref: '#/components/parameters/MuseumType'
-        - $ref: '#/components/parameters/MuseumTypeEquals'
-        - $ref: '#/components/parameters/MuseumTypeStartsWith'
-        - $ref: '#/components/parameters/MuseumTypeEndsWith'
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageItems"
+        - $ref: "#/components/parameters/MuseumSort"
+        - $ref: "#/components/parameters/MuseumName"
+        - $ref: "#/components/parameters/MuseumNameEquals"
+        - $ref: "#/components/parameters/MuseumNameStartsWith"
+        - $ref: "#/components/parameters/MuseumNameEndsWith"
+        - $ref: "#/components/parameters/City"
+        - $ref: "#/components/parameters/CityEquals"
+        - $ref: "#/components/parameters/CityStartsWith"
+        - $ref: "#/components/parameters/CityEndsWith"
+        - $ref: "#/components/parameters/MuseumType"
+        - $ref: "#/components/parameters/MuseumTypeEquals"
+        - $ref: "#/components/parameters/MuseumTypeStartsWith"
+        - $ref: "#/components/parameters/MuseumTypeEndsWith"
         - name: foundation_date_after
           in: query
           description: Founded on or after this date (inclusive).
@@ -44,17 +46,18 @@ paths:
         - name: foundation_date_between
           in: query
           description: Comma-separated inclusive date range, YYYY-MM-DD,YYYY-MM-DD. Do not combine with after or before.
-          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$' }
+          schema:
+            { type: string, pattern: '^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$' }
         - name: has_website
           in: query
           description: Whether the museum has a nonempty website field. Accepts true, false, 1, or 0.
-          schema: { type: string, enum: ['true', 'false', '1', '0'] }
+          schema: { type: string, enum: ["true", "false", "1", "0"] }
       responses:
-        '200':
+        "200":
           description: Museum Collection
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/MuseumCollection' }
+              schema: { $ref: "#/components/schemas/MuseumCollection" }
               example:
                 meta: { page: 1, page_size: 5, total_records: 1 }
                 data:
@@ -62,28 +65,28 @@ paths:
                     museum_name: Example Museum
                     city: Example City
                     museum_type: Example Type
-                    foundation_date: '1880-01-01'
+                    foundation_date: "1880-01-01"
                     website: https://example.org
-        '400': { $ref: '#/components/responses/BadRequest' }
-        '406': { $ref: '#/components/responses/NotAcceptable' }
-        '500': { $ref: '#/components/responses/ServerError' }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /museums/{museumId}:
     get:
       tags: [Museums]
       operationId: getMuseumById
       summary: Get a museum by ID
       parameters:
-        - $ref: '#/components/parameters/MuseumId'
+        - $ref: "#/components/parameters/MuseumId"
       responses:
-        '200':
+        "200":
           description: Museum found.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Museum' }
-        '400': { $ref: '#/components/responses/BadRequest' }
-        '404': { $ref: '#/components/responses/NotFound' }
-        '406': { $ref: '#/components/responses/NotAcceptable' }
-        '500': { $ref: '#/components/responses/ServerError' }
+              schema: { $ref: "#/components/schemas/Museum" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /museums/{museumId}/scientists:
     get:
       tags: [Museums]
@@ -91,9 +94,9 @@ paths:
       summary: List scientists associated with a museum
       description: Name and specialization use exact-value matching
       parameters:
-        - $ref: '#/components/parameters/MuseumId'
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageItems'
+        - $ref: "#/components/parameters/MuseumId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageItems"
         - name: first_name
           in: query
           description: Exact scientist first name.
@@ -104,7 +107,7 @@ paths:
           schema: { type: string }
         - name: is_active
           in: query
-          schema: { type: string, enum: ['true', 'false', '1', '0'] }
+          schema: { type: string, enum: ["true", "false", "1", "0"] }
         - name: min_experience
           in: query
           schema: { type: integer, minimum: 0, maximum: 69 }
@@ -119,26 +122,38 @@ paths:
           description: Prefix an allowed column name with '-' for descending order.
           schema:
             type: string
-            enum: [first_name, '-first_name', last_name, '-last_name', specialization, '-specialization', degree, '-degree', years_of_experience, '-years_of_experience']
+            enum:
+              [
+                first_name,
+                "-first_name",
+                last_name,
+                "-last_name",
+                specialization,
+                "-specialization",
+                degree,
+                "-degree",
+                years_of_experience,
+                "-years_of_experience",
+              ]
       responses:
-        '200':
+        "200":
           description: Scientists for the museum
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ScientistCollection' }
-        '400': { $ref: '#/components/responses/BadRequest' }
-        '404': { $ref: '#/components/responses/NotFound' }
-        '406': { $ref: '#/components/responses/NotAcceptable' }
-        '500': { $ref: '#/components/responses/ServerError' }
+              schema: { $ref: "#/components/schemas/ScientistCollection" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /museums/{museumId}/artifacts:
     get:
       tags: [Museums]
       operationId: listMuseumArtifacts
       summary: List artifacts belonging to a museum
       parameters:
-        - $ref: '#/components/parameters/MuseumId'
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageItems'
+        - $ref: "#/components/parameters/MuseumId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageItems"
         - name: artifact_name
           in: query
           description: Partial match on artifact name.
@@ -164,17 +179,28 @@ paths:
           description: Prefix an allowed field with '-' for descending order.
           schema:
             type: string
-            enum: [artifact_name, '-artifact_name', estimated_value, '-estimated_value', condition, '-condition', material, weight_in_g, height_in_cm]
+            enum:
+              [
+                artifact_name,
+                "-artifact_name",
+                estimated_value,
+                "-estimated_value",
+                condition,
+                "-condition",
+                material,
+                weight_in_g,
+                height_in_cm,
+              ]
       responses:
-        '200':
+        "200":
           description: Artifacts for the museum
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ArtifactCollection' }
-        '400': { $ref: '#/components/responses/BadRequest' }
-        '404': { $ref: '#/components/responses/NotFound' }
-        '406': { $ref: '#/components/responses/NotAcceptable' }
-        '500': { $ref: '#/components/responses/ServerError' }
+              schema: { $ref: "#/components/schemas/ArtifactCollection" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /artifacts:
     get:
       tags: [Artifacts]
@@ -182,8 +208,8 @@ paths:
       summary: List artifacts
       description: Returns a filtered, sorted, paginated collection of artifacts. Note that all values are case-insensitive strings.
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageItems'
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageItems"
         - name: artifact_name
           in: query
           description: Partial match on artifact name.
@@ -221,31 +247,31 @@ paths:
             type: string
             enum: [asc, desc]
       responses:
-        '200':
+        "200":
           description: Artifact Collection
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ArtifactCollection' }
-        '406': { $ref: '#/components/responses/NotAcceptable' }
-        '422': { $ref: '#/components/responses/UnprocessableEntity' }
-        '500': { $ref: '#/components/responses/ServerError' }
+              schema: { $ref: "#/components/schemas/ArtifactCollection" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /artifacts/{artifactId}:
     get:
       tags: [Artifacts]
       operationId: getArtifactById
       summary: Get an artifact by ID
       parameters:
-        - $ref: '#/components/parameters/ArtifactId'
+        - $ref: "#/components/parameters/ArtifactId"
       responses:
-        '200':
+        "200":
           description: Artifact found.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Artifact' }
-        '400': { $ref: '#/components/responses/BadRequest' }
-        '404': { $ref: '#/components/responses/NotFound' }
-        '406': { $ref: '#/components/responses/NotAcceptable' }
-        '500': { $ref: '#/components/responses/ServerError' }
+              schema: { $ref: "#/components/schemas/Artifact" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /sites:
     get:
       tags: [Sites]
@@ -267,15 +293,49 @@ paths:
         - $ref: "#/components/parameters/ProtectedParam"
         - $ref: "#/components/parameters/CultureIdParam"
         - $ref: "#/components/parameters/PeriodIdParam"
+        - $ref: "#/components/parameters/SiteSortParam"
       responses:
         "200":
           description: OK
-        "400":
-          description: Bad Request
-        "404":
-          description: Not Found
-        "422":
-          description: Unprocessable Content
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SiteCollection" }
+              example:
+                meta: { page: 1, page_size: 10, total_records: 12 }
+                data:
+                  - site_id: 5
+                    site_name: Pompeii
+                    site_type: city
+                    discovery_date: "1748-03-30"
+                    estimated_age: 2700
+                    country: Italy
+                    region: Campania
+                    latitude: 40.7462
+                    longitude: 14.4989
+                    is_protected: true
+                    culture_id: 4
+                    period_id: 8
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+  /sites/{siteId}:
+    get:
+      tags: [Sites]
+      operationId: getSiteById
+      summary: Get a site by ID
+      parameters:
+        - $ref: "#/components/parameters/SiteId"
+      responses:
+        "200":
+          description: Site found.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Site" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
 components:
   parameters:
     MuseumId:
@@ -301,7 +361,17 @@ components:
       description: Sort by field, ascending by default. Prefix with '-' for descending.
       schema:
         type: string
-        enum: [museum_name, '-museum_name', city, '-city', museum_type, '-museum_type', foundation_date, '-foundation_date']
+        enum:
+          [
+            museum_name,
+            "-museum_name",
+            city,
+            "-city",
+            museum_type,
+            "-museum_type",
+            foundation_date,
+            "-foundation_date",
+          ]
     MuseumName:
       name: museum_name
       in: query
@@ -386,10 +456,11 @@ components:
       description: The number of items generated for each page
       required: false
       schema:
+        type: integer
         minimum: 1
         maximum: 200
         default: 10
-      example: 1
+      example: 2
 
     SiteNameParam:
       name: site_name
@@ -474,7 +545,7 @@ components:
     CultureIdParam:
       name: culture_id
       in: query
-      description: Only sites belonging to this culture. Must be a non-negative integer.
+      description: Only sites belonging to this culture. Must be a positive integer.
       required: false
       schema:
         type: integer
@@ -484,7 +555,7 @@ components:
     PeriodIdParam:
       name: period_id
       in: query
-      description: Only sites belonging to this historical period. Must be a non-negative integer.
+      description: Only sites belonging to this historical period. Must be a positive integer.
       required: false
       schema:
         type: integer
@@ -504,13 +575,21 @@ components:
         type: string
         pattern: "^-?(site_name|site_type|discovery_date|estimated_age|country|region|latitude|longitude|culture_id|period_id)$"
       example: -estimated_age
+
+    SiteId:
+      name: siteId
+      in: path
+      required: true
+      description: Positive integer site identifier.
+      schema: { type: integer, minimum: 1 }
+      example: 5
   schemas:
     Museum:
       type: object
       description: Museum Object
       properties:
         museum_id: { type: integer }
-        museum_name: { type: string}
+        museum_name: { type: string }
         city: { type: string, nullable: true }
         foundation_date: { type: string, format: date, nullable: true }
         website: { type: string, nullable: true }
@@ -522,12 +601,12 @@ components:
         scientist_id: { type: integer }
         first_name: { type: string }
         last_name: { type: string }
-        degree: { type: string, enum: [BA, BSc, MA, MSc, PhD], nullable: true}
-        specialization: { type: string, nullable: true}
+        degree: { type: string, enum: [BA, BSc, MA, MSc, PhD], nullable: true }
+        specialization: { type: string, nullable: true }
         museum_id: { type: integer, nullable: true }
-        years_of_experience: { type: integer, nullable: true}
+        years_of_experience: { type: integer, nullable: true }
         is_active: { type: boolean }
-        biography: {type: string, nullable: true}
+        biography: { type: string, nullable: true }
     Artifact:
       type: object
       description: Artifact object
@@ -538,9 +617,26 @@ components:
         artifact_type: { type: string }
         museum_id: { type: integer }
         condition: { type: string }
-        material: {type: string, nullable: true}
+        material: { type: string, nullable: true }
         weight_in_g: { type: number, nullable: true }
         height_in_cm: { type: number, nullable: true }
+    Site:
+      type: object
+      description: Archeological site object
+      properties:
+        site_id: { type: integer }
+        site_name: { type: string }
+        site_type: { type: string }
+        discovery_date: { type: string, format: date, nullable: true }
+        estimated_age: { type: number, nullable: true }
+        country: { type: string }
+        region: { type: string, nullable: true }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+        is_protected: { type: boolean }
+        culture_id: { type: integer, nullable: true }
+        period_id: { type: integer, nullable: true }
+      required: [site_id, site_name, site_type, country]
     PaginationMeta:
       type: object
       additionalProperties: true
@@ -551,33 +647,41 @@ components:
     MuseumCollection:
       type: object
       properties:
-        meta: { $ref: '#/components/schemas/PaginationMeta' }
+        meta: { $ref: "#/components/schemas/PaginationMeta" }
         data:
           type: array
-          items: { $ref: '#/components/schemas/Museum' }
+          items: { $ref: "#/components/schemas/Museum" }
       required: [meta, data]
     ScientistCollection:
       type: object
       properties:
-        meta: { $ref: '#/components/schemas/PaginationMeta' }
+        meta: { $ref: "#/components/schemas/PaginationMeta" }
         data:
           type: array
-          items: { $ref: '#/components/schemas/Scientist' }
+          items: { $ref: "#/components/schemas/Scientist" }
       required: [meta, data]
     ArtifactCollection:
       type: object
       properties:
-        meta: { $ref: '#/components/schemas/PaginationMeta' }
+        meta: { $ref: "#/components/schemas/PaginationMeta" }
         data:
           type: array
-          items: { $ref: '#/components/schemas/Artifact' }
+          items: { $ref: "#/components/schemas/Artifact" }
+      required: [meta, data]
+    SiteCollection:
+      type: object
+      properties:
+        meta: { $ref: "#/components/schemas/PaginationMeta" }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/Site" }
       required: [meta, data]
     Error:
       type: object
       description: Provisional JSON error structure; match the team's actual HttpErrorHandler.
       properties:
         code: { type: integer }
-        status: { type: string}
+        status: { type: string }
         message: { type: string }
       required: [code, message]
 
@@ -586,33 +690,42 @@ components:
       description: Invalid query parameter or malformed resource ID.
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
           example: { code: 400, status: Error, message: Malformed resource ID. }
     NotFound:
       description: The requested resource was not found.
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
           example: { code: 404, status: Error, message: Resource not found. }
 
     NotAcceptable:
       description: The requested response media type is not supported.
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
-          example: { code: 406, status: Error, message: Only application/json is supported. }
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            {
+              code: 406,
+              status: Error,
+              message: Only application/json is supported.,
+            }
 
     UnprocessableEntity:
       description: The server understands the request syntax and format, but cannot process the contained instructions due to semantic or data validation errors.
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
-          example: { code: 422, status: Error, message: The server was unable to process the contained instructions}
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            {
+              code: 422,
+              status: Error,
+              message: The server was unable to process the contained instructions,
+            }
 
     ServerError:
       description: Unexpected server error.
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
           example: { code: 500, status: Error, message: Internal server error. }
-
