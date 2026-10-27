@@ -16,21 +16,48 @@ class SitesController extends BaseController
 
 
     //*callbacks for GET
+    /**
+     * Handles the request and response logic for sending the archeological site collection
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
     public function handleGetSites(Request $request, Response $response): Response
     {
         return $this->handleGetCollection($request, $response, "getSites");
     }
 
+    /**
+     * Handles the request and response logic for sending a singleton site resource
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
     public function handleGetSitesById(Request $request, Response $response, array $args): Response
     {
         return $this->handleGetCollectionById($request, $response, $args, "getSitesById");
     }
 
+    /**
+     * Handles the request and response logic for sending the archeological site sub-collection: historical periods
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
     public function handleGetSitePeriod(Request $request, Response $response, array $args): Response
     {
         return $this->handleGetSubCollection($request, $response, $args, "getSitePeriod");
     }
 
+    /**
+     * Handles the request and response logic for sending the archeological site sub-collection: cultures
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
     public function handleGetSiteCulture(Request $request, Response $response, array $args): Response
     {
         return $this->handleGetSubCollection($request, $response, $args, "getSiteCulture");

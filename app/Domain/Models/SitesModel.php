@@ -29,21 +29,43 @@ class SitesModel extends BaseModel
     ];
 
 
+    /**
+     * Handles SQL retrieval of full  archeological sites collection
+     * @param array $filters
+     * @return array
+     */
     public function getSites(array $filters): array
     {
         return $this->getCollection($filters, 'archeological_site', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
     }
 
+    /**
+     * Handles the SQL retrieval of archeological site singleton resource
+     * @param int $site_id
+     * @return array|bool
+     */
     public function getSitesById(int $site_id): array | false
     {
         return $this->getCollectionById($site_id, 'archeological_site', 'site_id');
     }
 
+    /**
+     * Handles SQL retrieval of archeological sites sub-collection: culture
+     * @param array $filters
+     * @param int $site_id
+     * @return array|bool
+     */
     public function getSiteCulture(array $filters, int $site_id): array | false
     {
         return $this->getSubCollection($site_id, 'archeological_site', 'cultures', 'culture_id', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
     }
 
+    /**
+     * Handles SQL retrieval of archeological sites sub-collection: historical periods
+     * @param array $filters
+     * @param int $site_id
+     * @return array|bool
+     */
     public function getSitePeriod(array $filters, int $site_id): array | false
     {
         return $this->getSubCollection($site_id, 'archeological_site', 'historical_period', 'period_id', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
