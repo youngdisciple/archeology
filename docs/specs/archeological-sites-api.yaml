@@ -9,9 +9,14 @@ info:
 servers:
   - url: http://localhost/archeology
     description: Localhost server for the archeology web service
+tags:
+  - name: Sites
+    description: Archeological sites collection, singleton and sub-collections
 paths:
   /sites:
     get:
+      tags:
+        - Sites
       summary: Get the list of famous archeological sites
       operationId: getSites
       description: Returns a paginated, filterable and sortable collection of
@@ -30,15 +35,81 @@ paths:
         - $ref: "#/components/parameters/ProtectedParam"
         - $ref: "#/components/parameters/CultureIdParam"
         - $ref: "#/components/parameters/PeriodIdParam"
+        - $ref: "#/components/parameters/SiteSortParam"
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteResponse"
+              example:
+                data:
+                  - site_id: 5
+                    site_name: Pompeii
+                    site_type: city
+                    discovery_date: "1748-03-30"
+                    estimated_age: 2700
+                    country: Italy
+                    region: Campania
+                    latitude: 40.7462
+                    longitude: 14.4989
+                    is_protected: true
+                    culture_id: 4
+                    period_id: 8
+                pagination:
+                  current_page: 1
+                  page_size: 10
+                  total_records: 12
+                  total_pages: 2
         "400":
           description: Bad Request
+          $ref: "#/components/responses/BadRequest"
         "404":
           description: Not Found
+          $ref: "#/components/responses/NotFound"
+        "406":
+          description: Not NotAcceptable
+          $ref: "#/components/responses/NotAcceptable"
         "422":
           description: Unprocessable Content
+          $ref: "#/components/responses/UnprocessableContent"
+
+  /sites/{site_id}:
+    get:
+      tags:
+        - Sites
+      summary: Get a singleton resource in the sites collection
+      operationId: getSiteById
+      description: returns a single resource of an archeological site based on its unique ID from the database. Doesn't need filtering pagination or sorting since it returns only 1 thing.
+      parameters:
+        - $ref: "#/components/schemas/SiteId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteId'
+              example:
+                site_id: 5
+                site_name: Pompeii
+                site_type: city
+                discovery_date: "1748-03-30"
+                estimated_age: 2700
+                country: Italy
+                region: Campania
+                latitude: 40.7462
+                longitude: 14.4989
+                is_protected: true
+                culture_id: 4
+                period_id: 8
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "406":
+          $ref: "#/components/responses/NotAcceptable"
 
 components:
   parameters:
@@ -177,3 +248,6 @@ components:
         type: string
         pattern: "^-?(site_name|site_type|discovery_date|estimated_age|country|region|latitude|longitude|culture_id|period_id)$"
       example: -estimated_age
+
+  schemas:
+    Sites:
