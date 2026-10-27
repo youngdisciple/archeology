@@ -10,6 +10,7 @@ servers:
 tags:
   - name: Museums
   - name: Artifacts
+  - name: Scientists
 paths:
   /museums:
     get:
@@ -246,6 +247,134 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '406': { $ref: '#/components/responses/NotAcceptable' }
         '500': { $ref: '#/components/responses/ServerError' }
+  /scientists:
+    get:
+      tags: [Scientists]
+      operationId: listScientists
+      summary: List scientists
+      description: Returns a collection of scientists.
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: first_name
+          in: query
+          description: Exact scientist first name.
+          schema: { type: string }
+        - name: specialization
+          in: query
+          description: Exact specialization.
+          schema: { type: string }
+        - name: is_active
+          in: query
+          description: Whether the scientist is currently active. Accepts true, false, 1, or 0.
+          schema: { type: string, enum: ['true', 'false', '1', '0'] }
+        - name: min_experience
+          in: query
+          description: Minimum years of experience (inclusive).
+          schema: { type: integer, minimum: 0, maximum: 69 }
+        - name: max_experience
+          in: query
+          description: Maximum years of experience (inclusive).
+          schema: { type: integer, minimum: 1, maximum: 70 }
+        - name: has_degree
+          in: query
+          description: Exact degree value.
+          schema: { type: string, enum: [BA, BSc, MA, MSc, PhD] }
+        - name: sort
+          in: query
+          description: Sort by field, ascending by default. Prefix with '-' for descending.
+          schema:
+            type: string
+            enum: [first_name, '-first_name', last_name, '-last_name', specialization, '-specialization', degree, '-degree', years_of_experience, '-years_of_experience']
+      responses:
+        '200':
+          description: Scientist Collection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ScientistCollection' }
+              example:
+                meta: { page: 1, page_size: 10, total_records: 1 }
+                data:
+                  - scientist_id: 1
+                    first_name: Example
+                    last_name: Scientist
+                    degree: PhD
+                    specialization: Example Specialization
+                    museum_id: 1
+                    years_of_experience: 12
+                    is_active: true
+                    biography: Example biography.
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '406': { $ref: '#/components/responses/NotAcceptable' }
+        '422': { $ref: '#/components/responses/UnprocessableEntity' }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /scientists/{scientistId}:
+    get:
+      tags: [Scientists]
+      operationId: getScientistById
+      summary: Get a scientist by ID
+      parameters:
+        - $ref: '#/components/parameters/ScientistId'
+      responses:
+        '200':
+          description: Scientist found.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Scientist' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '406': { $ref: '#/components/responses/NotAcceptable' }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /scientists/{scientistId}/excavations:
+    get:
+      tags: [Scientists]
+      operationId: listScientistExcavations
+      summary: List excavations led by a scientist
+      parameters:
+        - $ref: '#/components/parameters/ScientistId'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: project_name
+          in: query
+          description: Partial match on project name.
+          schema: { type: string }
+        - name: start_date_after
+          in: query
+          description: Started on or after this date (inclusive).
+          schema: { type: string, format: date }
+        - name: start_date_before
+          in: query
+          description: Started on or before this date (inclusive).
+          schema: { type: string, format: date }
+        - name: start_date_between
+          in: query
+          description: Comma-separated inclusive date range, YYYY-MM-DD,YYYY-MM-DD. Do not combine with after or before.
+          schema: { type: string, pattern: '^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$' }
+        - name: min_budget
+          in: query
+          description: Lower budget bound
+          schema: { type: number, minimum: 0, maximum: 100000000 }
+        - name: max_budget
+          in: query
+          description: Upper budget bound
+          schema: { type: number, minimum: 1, maximum: 99999999 }
+        - name: sort
+          in: query
+          description: Prefix an allowed field with '-' for descending order.
+          schema:
+            type: string
+            enum: [project_name, '-project_name', start_date, '-start_date', end_date, '-end_date', budget, '-budget', area_excavated_m2, '-area_excavated_m2', team_size, '-team_size']
+      responses:
+        '200':
+          description: Excavations for the scientist
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExcavationCollection' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '406': { $ref: '#/components/responses/NotAcceptable' }
+        '422': { $ref: '#/components/responses/UnprocessableEntity' }
+        '500': { $ref: '#/components/responses/ServerError' }
   /sites:
     get:
       tags: [Sites]
@@ -367,6 +496,13 @@ components:
       in: path
       required: true
       description: Positive integer artifact identifier.
+      schema: { type: integer, minimum: 1 }
+      example: 1
+    ScientistId:
+      name: scientistId
+      in: path
+      required: true
+      description: Positive integer scientist identifier.
       schema: { type: integer, minimum: 1 }
       example: 1
     PageParam:
@@ -541,6 +677,20 @@ components:
         material: {type: string, nullable: true}
         weight_in_g: { type: number, nullable: true }
         height_in_cm: { type: number, nullable: true }
+    Excavation:
+      type: object
+      description: Excavation object
+      properties:
+        excavation_id: { type: integer }
+        project_name: { type: string }
+        start_date: { type: string, format: date, nullable: true }
+        end_date: { type: string, format: date, nullable: true }
+        budget: { type: number, format: float, nullable: true }
+        area_excavated_m2: { type: number, format: float, nullable: true }
+        team_size: { type: integer, nullable: true }
+        notes: { type: string, nullable: true }
+        site_id: { type: integer }
+        scientist_id: { type: integer }
     PaginationMeta:
       type: object
       additionalProperties: true
@@ -572,6 +722,24 @@ components:
           type: array
           items: { $ref: '#/components/schemas/Artifact' }
       required: [meta, data]
+    ExcavationCollection:
+      type: object
+      properties:
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Excavation' }
+      required: [meta, data]
+    CreatedResult:
+      type: object
+      properties:
+        code: { type: integer }
+        status: { type: string }
+        message: { type: string }
+        items_ids:
+          type: array
+          items: { type: integer }
+      required: [code, message]
     Error:
       type: object
       description: Provisional JSON error structure; match the team's actual HttpErrorHandler.
