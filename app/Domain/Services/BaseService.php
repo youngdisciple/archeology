@@ -1,8 +1,12 @@
 <?php
 
+
+
 declare(strict_types=1);
 
 namespace App\Domain\Services;
+
+use Frostybee\Valicomb\Validator;
 
 /**
  * Base service class for all services.
@@ -14,5 +18,16 @@ abstract class BaseService
 {
     //*NOTES: This class is not used yet. It is a placeholder for future services.
     //*NOTES: Here, you can define common methods for all services such as logging, validation, etc.
+    public function validatePost(array $data, array $rules) {
 
+        $v = new Validator($data);
+        $v->forFields($rules);
+
+        if (!$v->validate()) {
+            print_r($v->errors());
+            exit;
+        } else {
+            echo "Valid data!";
+        }
+    }
 }
