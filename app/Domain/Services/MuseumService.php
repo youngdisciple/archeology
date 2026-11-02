@@ -31,8 +31,36 @@ class MuseumService extends BaseService
         //? NOTE: In case of a successful insertion -> collect and return the last inserted IDs
         return Result::success("The new museums were created successfully!", $created_item_ids);
         return Result::failure("Error.", $errors);
+    }
 
-        //TODO: Add two new public methods: One for the update operation and one for delete operation.
+
+    //TODO: Add two new public methods: One for the update operation and one for delete operation.
+
+    public function doUpdateMuseums(array $museums, array $conditions) : Result {
+
+        $errors = [];
+        //TODO: unset/remove the museum id from the array to be passed to the model before calling the model's update method
+        foreach($museums as $museum){
+            //TODO: validate
+            $museum_id = $museum['museum_id'];
+            unset($museum['museum_id']);
+            $this->museumModel->updateMuseum($museum, $museum_id);
+        }
+
+        // $updatedMuseums = $this->museumModel->updateMuseum($museums, $conditions);
+
+        return Result::success("The museums have been updated successfully!", $updatedMuseums);
+    }
+
+    public function doDeleteMuseums(array $conditions, int $limit) : Result {
+
+        $errors = [];
+        //validate
+        //process
+
+        $museumsToDelete = $this->museumModel->deleteMuseum($conditions, $limit);
+
+        return Result::success("The museums have been updated successfully!", $museumsToDelete);
     }
 
 }

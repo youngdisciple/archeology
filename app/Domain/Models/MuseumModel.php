@@ -212,4 +212,26 @@ class MuseumModel extends BaseModel
             $museum
         );
     }
+
+    //* UPDATE
+    public function updateMuseum(array $museum, int $museum_id)
+    {
+        return $this->update(
+            "museum",
+            $museum,
+            ["museum_id" => $museum_id]
+        );
+    }
+
+    //* DELETE
+    // public function deleteMuseum(array $conditions, int $limit)
+    // {
+    //     return $this->delete(
+    //         "museum",
+    //         $conditions,
+    //         $limit
+    //     );
+    // }
+
+
 }

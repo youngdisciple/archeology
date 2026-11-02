@@ -68,4 +68,11 @@ class MuseumController extends BaseController
 
         return $this->renderJson($response, $responseData, $code);
     }
+
+    //* UPDATE
+    public function handleUpdateMuseum(Request $request, Response $response): Response
+    {
+        
+    }
+
 }
