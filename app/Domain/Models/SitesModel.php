@@ -71,8 +71,33 @@ class SitesModel extends BaseModel
         return $this->getSubCollection($site_id, 'archeological_site', 'historical_period', 'period_id', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
     }
 
+    /**
+     * handles the SQL logic for adding a new site to the database using the `insert()` function
+     * @param array $sites
+     */
     public function createSite(array $sites)
     {
-        return $this->insert('archeological_sites', $sites);
+        return $this->insert('archeological_site', $sites);
+    }
+
+    /**
+     * handles the SQL logic for updating an existing site in the database using the `update()` function
+     * @param array $sites
+     * @param int $site_id
+     * @return int
+     */
+    public function updateSites(array $sites, int $site_id)
+    {
+        return $this->update('archeological_site', $sites, ['site_id' => $site_id]);
+    }
+
+    /**
+     * handles the SQL logic for deleting an existing site in the database using the `delete()` function
+     * @param int $site_id
+     * @return int
+     */
+    public function deleteSites(int $site_id)
+    {
+        return $this->delete('archeological_site', ['site_id' => $site_id]);
     }
 }
