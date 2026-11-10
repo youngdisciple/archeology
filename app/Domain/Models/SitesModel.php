@@ -77,6 +77,7 @@ class SitesModel extends BaseModel
      */
     public function createSite(array $sites)
     {
+
         return $this->insert('archeological_site', $sites);
     }
 

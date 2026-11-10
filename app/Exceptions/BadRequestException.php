@@ -4,7 +4,7 @@ namespace App\Exceptions;
 
 use Slim\Exception\HttpSpecializedException;
 
-class InvalidResourceException extends HttpSpecializedException
+class BadRequestException extends HttpSpecializedException
 {
     protected $code = 400;
     protected $message = "Bad request";
