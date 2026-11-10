@@ -14,7 +14,7 @@ class MuseumController extends BaseController
         private MuseumService $museumService,
         private MuseumModel $museumModel
     ) {
-        parent::__construct($museumModel);
+        parent::__construct($museumModel, $museumService);
     }
 
     public function handleGetMuseums(Request $request, Response $response): Response

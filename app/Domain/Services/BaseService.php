@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Services;
 
+use App\Domain\Models\BaseModel;
+use App\Helpers\Core\Result as Result;
+use Frostybee\Valicomb\Validator;
+
 /**
  * Base service class for all services.
  *
@@ -15,4 +19,90 @@ abstract class BaseService
     //*NOTES: This class is not used yet. It is a placeholder for future services.
     //*NOTES: Here, you can define common methods for all services such as logging, validation, etc.
 
+    protected function __construct(protected BaseModel $base_model) {}
+
+    protected function doCreateCollection(array $new_collection, array $validation_rules, string $model_func): Result
+    {
+        $error_data = [];
+        $created_item_ids = [];
+        if (empty($new_collection)) {
+            return Result::failure("The request body must be a non-empty list of items.", []);
+        }
+        foreach ($new_collection as $collection_entry) {
+            if (!is_array($collection_entry)) {
+                $error_data[] = ['item' => ['Each new item must be an object']];
+                continue;
+            }
+
+            $collection_rules = new Validator($collection_entry);
+            $collection_rules->forFields($validation_rules);
+            if (!$collection_rules->validate()) {
+                $error_data[] = $collection_rules->getErrors();
+            }
+        }
+        if (!empty($error_data)) {
+            return Result::failure("An error occurred while trying to create the collection!", $error_data);
+        } else {
+            foreach ($new_collection as $collection) {
+                $last_inserted_id = $this->base_model->$model_func($collection);
+                $created_item_ids[] = $last_inserted_id;
+            }
+        }
+        return Result::success("New collection got added successfully!", $created_item_ids);
+    }
+
+    protected function doUpdateCollection(array $updated_collection, array $validation_rules, string $id_field, string $model_func): Result
+    {
+        $error_data = [];
+        if (empty($updated_collection)) {
+            return Result::failure("The request body must be a non-empty list of items.", []);
+        }
+        foreach ($updated_collection as $collection_entry) {
+            $collection_rules = new Validator($collection_entry);
+            $collection_rules->forFields(array_merge([$id_field => [
+                'required',
+                'integer',
+                ['min', 1]
+            ]], $validation_rules));
+            if (!$collection_rules->validate()) {
+                $error_data[] = $collection_rules->getErrors();
+            }
+        }
+        if (!empty($error_data)) {
+            return Result::failure("An error occurred while trying to update the collection!", $error_data);
+        }
+        foreach ($updated_collection as $collection) {
+            $collection_id = $collection[$id_field];
+            unset($collection[$id_field]);
+            $this->base_model->$model_func($collection, (int)$collection_id);
+        }
+        return Result::success("Collection resource was updated successfully!");
+    }
+
+    protected function doDeleteCollection(array $delete_collection, string $id_field, string $model_func): Result
+    {
+        $error_data = [];
+        if (empty($delete_collection)) {
+            return Result::failure("The request body must be a non-empty list of items.", []);
+        }
+        foreach ($delete_collection as $collection_entry) {
+            $collection_rules = new Validator($collection_entry);
+            $collection_rules->forFields([$id_field => [
+                'required',
+                'integer',
+                ['min', 1]
+            ]]);
+            if (!$collection_rules->validate()) {
+                $error_data[] = $collection_rules->getErrors();
+            }
+        }
+        if (!empty($error_data)) {
+            return Result::failure("An error occurred while trying to delete from the collection!", $error_data);
+        }
+        foreach ($delete_collection as $collection) {
+            $collection_id = $collection[$id_field];
+            $this->base_model->$model_func((int)$collection_id);
+        }
+        return Result::success("Collection resource deleted successfully!");
+    }
 }
