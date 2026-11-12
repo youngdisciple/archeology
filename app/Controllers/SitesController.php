@@ -66,7 +66,7 @@ class SitesController extends BaseController
 
     //*callback for POST
     /**
-     *
+     * calls the `BaseController`'s universal reusable function `handleCollectionOperation()`
      * @param Request $request
      * @param Response $response
      * @return Response
@@ -76,12 +76,24 @@ class SitesController extends BaseController
         return $this->handleCollectionOperation($request, $response, 'doCreateSites', 'The list of new sites was properly created!', 'Something went wrong, insertion of the new site was aborted', 201);
     }
 
+    /**
+     * calls the `BaseController`'s universal reusable function `handleCollectionOperation()`
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
     //*callback for PUT
     public function handleUpdateSites(Request $request, Response $response): Response
     {
         return $this->handleCollectionOperation($request, $response, 'doUpdateSites', "Sites got updated successfully!", "Something went wrong, the update on sites was aborted");
     }
 
+    /**
+     * calls the `BaseController`'s universal reusable function `handleCollectionOperation()`
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
     //*callback for DELETE
     public function handleDeleteSites(Request $request, Response $response): Response
     {

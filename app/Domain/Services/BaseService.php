@@ -19,8 +19,18 @@ abstract class BaseService
     //*NOTES: This class is not used yet. It is a placeholder for future services.
     //*NOTES: Here, you can define common methods for all services such as logging, validation, etc.
 
+    /**
+     * @param BaseModel $base_model a dependency injection of the base model is needed
+     */
     protected function __construct(protected BaseModel $base_model) {}
 
+    /**
+     * A reusable function that is applicable to all children of the `BaseService` and handles insertion and validation if a collection into the database
+     * @param array $new_collection the collection array
+     * @param array $validation_rules the associative array of the validation rules see documentation at https://github.com/frostybee/valicomb/tree/main/docs/src/content/docs/rules
+     * @param string $model_func string representation that creates from any child of `BaseModel`
+     * @return Result
+     */
     protected function doCreateCollection(array $new_collection, array $validation_rules, string $model_func): Result
     {
         $error_data = [];
@@ -51,6 +61,14 @@ abstract class BaseService
         return Result::success("New collection got added successfully!", $created_item_ids);
     }
 
+    /**
+     * A reusable function that is applicable to all children of the `BaseService` and handles updates and validation if a collection into the database
+     * @param array $updated_collection the collection array
+     * @param array $validation_rules the associative array of the validation rules see documentation at https://github.com/frostybee/valicomb/tree/main/docs/src/content/docs/rules
+     * @param string $id_field the id name (primary key) of the collection you want to update
+     * @param string $model_func string representation that creates from any child of `BaseModel`
+     * @return Result
+     */
     protected function doUpdateCollection(array $updated_collection, array $validation_rules, string $id_field, string $model_func): Result
     {
         $error_data = [];
@@ -79,6 +97,13 @@ abstract class BaseService
         return Result::success("Collection resource was updated successfully!");
     }
 
+    /**
+     * A reusable function that is applicable to all children of the `BaseService` and handles deleting and validation if a collection into the database
+     * @param array $delete_collection the collection array
+     * @param string $id_field the id name (primary key) of the collection you want to delete
+     * @param string $model_func string representation that creates from any child of `BaseModel`
+     * @return Result
+     */
     protected function doDeleteCollection(array $delete_collection, string $id_field, string $model_func): Result
     {
         $error_data = [];

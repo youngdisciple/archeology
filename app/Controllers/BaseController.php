@@ -110,6 +110,16 @@ abstract class BaseController
         return $this->renderJson($response, $sub_collection);
     }
 
+    /**
+     * A jack of trades type of function that handles POST, PUT , DELETE operations
+     * @param Request $request
+     * @param Response $response
+     * @param string $service_func is the string name of your service functions for whatever operation you want to do
+     * @param string $success_msg
+     * @param string $err_msg
+     * @param int $success_code is 200 by default unless it is POST which is 201
+     * @return Response
+     */
     protected function handleCollectionOperation(Request $request, Response $response, string $service_func, string $success_msg, string $err_msg, int $success_code = 200): Response
     {
         $body = $request->getParsedBody();

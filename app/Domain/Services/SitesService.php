@@ -4,8 +4,10 @@ namespace App\Domain\Services;
 
 use App\Domain\Models\SitesModel;
 use App\Helpers\Core\Result as Result;
-use Frostybee\Valicomb\Validator;
 
+/**
+ * A service class that is useful for validating and performing operations on collections via the `insert()`, `update()`, `delete()` functions that are called from the model class
+ */
 class SitesService extends BaseService
 {
     /**
@@ -92,16 +94,31 @@ class SitesService extends BaseService
         parent::__construct($sites_model);
     }
 
+    /**
+     * calls the parent's reusable function `doCreateCollection()`
+     * @param array $new_sites
+     * @return Result
+     */
     public function doCreateSites(array $new_sites): Result
     {
         return $this->doCreateCollection($new_sites, self::SITES_RULES, 'createSite');
     }
 
+    /**
+     * calls the parent's reusable function `doUpdateCollection`
+     * @param array $updated_sites
+     * @return Result
+     */
     public function doUpdateSites(array $updated_sites): Result
     {
         return $this->doUpdateCollection($updated_sites, self::SITES_RULES, 'site_id', 'updateSites');
     }
 
+    /**
+     * calls the parent's reusable function `doDeleteCollection`
+     * @param array $deleted_sites
+     * @return Result
+     */
     public function doDeleteSites(array $deleted_sites): Result
     {
         return $this->doDeleteCollection($deleted_sites, 'site_id', 'deleteSites');
