@@ -36,11 +36,12 @@ class WebServiceInvoker
             // Print or throw an error message/exception.
         }
 
-
         if (is_null($objects)) {
             echo "The list is empty";
             exit;
         }
+
+        return $objects;
 
     }
 }
