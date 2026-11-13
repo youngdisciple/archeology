@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Slim\Exception\HttpSpecializedException;
 
+/**
+ * For PDO and SQL errors that 
+ */
 class ConflictException extends HttpSpecializedException
 {
     protected $code = 409;

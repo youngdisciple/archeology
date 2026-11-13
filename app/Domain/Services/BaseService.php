@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Domain\Services;
 
 use App\Domain\Models\BaseModel;
+use App\Exceptions\ConflictException;
 use App\Helpers\Core\Result as Result;
 use Frostybee\Valicomb\Validator;
+use PDOException;
 
 /**
  * Base service class for all services.
@@ -92,7 +94,12 @@ abstract class BaseService
         foreach ($updated_collection as $collection) {
             $collection_id = $collection[$id_field];
             unset($collection[$id_field]);
+            //try {
             $this->base_model->$model_func($collection, (int)$collection_id);
+            /* } catch (PDOException $e) {
+                throw new ConflictException();
+            }
+            */
         }
         return Result::success("Collection resource was updated successfully!");
     }

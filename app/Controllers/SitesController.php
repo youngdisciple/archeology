@@ -22,9 +22,10 @@ class SitesController extends BaseController
      * @param Response $response
      * @return Response
      */
-    public function handleGetSites(Request $request, Response $response): Response
+    public function handleGetSites(Request $request, Response $response, array $uri_args): Response
     {
-        return $this->handleGetCollection($request, $response, "getSites");
+        $api_data = $this->sites_model->
+        return $this->handleGetCollection($request, $response, "getSites", $uri_args);
     }
 
     /**

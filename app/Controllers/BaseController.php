@@ -32,7 +32,7 @@ abstract class BaseController
      * @throws BadRequestException
      * @return Response
      */
-    protected function handleGetCollection(Request $request, Response $response, string $model_func): Response
+    protected function handleGetCollection(Request $request, Response $response, string $model_func, array $uri_args): Response
     {
         $filters = $request->getQueryParams();
         $current_page = $filters["current_page"] ?? "1";
@@ -49,6 +49,7 @@ abstract class BaseController
         } catch (\InvalidArgumentException $e) {
             throw new UnprocessableEntityException($request, $e->getMessage());
         }
+        $api_data = $this->base_model->$model_func($filters);
         return $this->renderJson($response, $collection);
     }
 
@@ -118,13 +119,19 @@ abstract class BaseController
      * @param string $success_msg
      * @param string $err_msg
      * @param int $success_code is 200 by default unless it is POST which is 201
+     * @throws BadRequestException
+     * @throws UnprocessableEntityException
      * @return Response
      */
     protected function handleCollectionOperation(Request $request, Response $response, string $service_func, string $success_msg, string $err_msg, int $success_code = 200): Response
     {
         $body = $request->getParsedBody();
-        $payload = is_array($body) ? $body : [];
+        $payload = is_array($body) ? $body : throw new BadRequestException($request); //making sure body request isn't empty or it causes a 500 error
+        //try{
         $result = $this->base_service->$service_func($payload);
+        //}catch(){
+
+        //}
         $response_data = [];
         if ($result->isSuccess()) {
             $response_data = [
@@ -134,6 +141,8 @@ abstract class BaseController
             return $this->renderJson($response, $response_data, $success_code);
         }
         if ($result->isFailure()) {
+            throw (new UnprocessableEntityException($request, $err_msg));
+            /*
             $code = 400;
             $response_data = [
                 "code" => $code,
@@ -141,7 +150,9 @@ abstract class BaseController
                 "message" => $err_msg,
                 "details" => $result->getErrors()
             ];
+
             return $this->renderJson($response, $response_data, $code);
+            */
         }
         return $response;
     }
