@@ -26,6 +26,7 @@ abstract class BaseController
     }
 
     /**
+     * GET /museums
      * A reusable function that can be used to get any collection from the database as long as the collectionName is specified
      * @param Request $request
      * @param Response $response

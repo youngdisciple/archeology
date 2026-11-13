@@ -2,6 +2,8 @@
 
 namespace App\Domain\Models;
 
+use App\Helpers\WebServiceInvoker;
+
 
 class MuseumModel extends BaseModel
 {
@@ -82,12 +84,31 @@ class MuseumModel extends BaseModel
             'foundation_date'
         ];
 
-        return $this->getCollection(
+        $data  = $this->getCollection(
             $filters,
             'museum',
             $filterConfig,
             $sortableFields
         );
+        $data["objects"] = $this->getListOfObjects($filters);
+
+        return $data;
+    }
+    public function getListOfObjects($filters): mixed
+    {
+        //TODO: extract the filter that identifies the object id you want to pull?
+        $object_id = $filters["object_id"] ?? "437133";
+        $response = [];
+        try {
+            $invoker = new WebServiceInvoker();
+            $uri = "https://collectionapi.metmuseum.org/public/collection/v1/objects/$object_id";
+            // echo $uri;
+            $response = $invoker->invokeUri($uri);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+        return $response;
     }
 
     public function getMuseumById(int $museum_id): array | false

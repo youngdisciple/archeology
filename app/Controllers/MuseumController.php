@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Domain\Models\MuseumModel;
 use App\Domain\Services\MuseumService;
+use App\Helpers\WebServiceInvoker;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -12,13 +13,16 @@ class MuseumController extends BaseController
 
     public function __construct(
         private MuseumService $museumService,
-        private MuseumModel $museumModel
+        private MuseumModel $museumModel,
+        private WebServiceInvoker $invoker
     ) {
         parent::__construct($museumModel, $museumService);
     }
 
+    // GET /museums
     public function handleGetMuseums(Request $request, Response $response): Response
     {
+        // CALL the remote API here.
         return $this->handleGetCollection($request, $response, 'getMuseums');
     }
 
