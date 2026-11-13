@@ -36,7 +36,7 @@ class MuseumService extends BaseService
 
     //TODO: Add two new public methods: One for the update operation and one for delete operation.
 
-    public function doUpdateMuseums(array $museums, array $conditions) : Result {
+    public function doUpdateMuseums(array $museums) : Result {
 
         $errors = [];
         //TODO: unset/remove the museum id from the array to be passed to the model before calling the model's update method
@@ -49,7 +49,7 @@ class MuseumService extends BaseService
 
         // $updatedMuseums = $this->museumModel->updateMuseum($museums, $conditions);
 
-        return Result::success("The museums have been updated successfully!", $updatedMuseums);
+        return Result::success("The museums have been updated successfully!", $museums);
     }
 
     public function doDeleteMuseums(array $conditions, int $limit) : Result {

@@ -72,6 +72,9 @@ class MuseumController extends BaseController
     //* UPDATE
     public function handleUpdateMuseum(Request $request, Response $response): Response
     {
+        $payload = $request->getParsedBody();
+
+        $museum = $this->museumService->doUpdateMuseums($payload);
         
     }
 
