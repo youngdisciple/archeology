@@ -23,10 +23,11 @@ class WebServiceInvoker
         }
 
         if ($response->getStatusCode() !== 200) {
-            echo "<br> The request failed for this reason:
-                {$response->getStatusCode()}
-                {$response->getReasonPhrase()}";
+            // echo "<br> The request failed for this reason:
+            //     {$response->getStatusCode()}
+            //     {$response->getReasonPhrase()}";
             //throw new Exception("<br> The request failed for this reason: {$response->getStatusCode()} {$response->getReasonPhrase()}");
+            if ()
         }
 
         $payload = $response->getBody()->getContents();

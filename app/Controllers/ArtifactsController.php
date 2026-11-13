@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Domain\Models\ArtifactsModel;
+use App\Helpers\WebServiceInvoker;
 use App\Validation\ValidationHelper;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -27,6 +28,7 @@ class ArtifactsController extends BaseController
 
             $rules = [
                 "artifact_name" => fn() => true, // No rules, free pass
+                "artifact_name_2" => fn() => true, // FOR API
                 "under_estimated_value" => fn($v) => preg_match(NON_NEGATIVE_DECIMAL_NUMBER, $v),
                 "over_estimated_value" => fn($v) => preg_match(NON_NEGATIVE_DECIMAL_NUMBER, $v),
                 "artifact_type" => fn() => true,
@@ -40,6 +42,11 @@ class ArtifactsController extends BaseController
         }
 
         $artifacts = $this->artifactsModel->getArtifacts($params);
+
+        $artifactName2 = $params['artifact_name_2'];
+        if (!empty($artifactName2)) {
+            $artifacts['related_data_api'] = $this->getApiArtifacts($artifactName2);
+        }
 
         return $this->renderJson($response, $artifacts);
     }
@@ -65,5 +72,16 @@ class ArtifactsController extends BaseController
         }
 
         return $this->renderJson($response, $artifact);
+    }
+
+    /**
+     * Fetches artifacts from the external API
+     * @param string $q
+     * @return mixed
+     */
+    private function getApiArtifacts(string $q) : mixed
+    {
+        $data = WebServiceInvoker::invokeUri("https://api.artic.edu/api/v1/artworks?q=$q&limit=1");
+        return $data;
     }
 }
