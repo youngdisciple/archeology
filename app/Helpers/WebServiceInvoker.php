@@ -7,10 +7,10 @@ use GuzzleHttp\Exception\GuzzleException;
 
 class WebServiceInvoker
 {
-
+    private array $request_options = [];
     public function __construct(array $options)
     {
-
+        $this->request_options = $options;
     }
 
     public static function invokeUri(string $resourceUri) {
@@ -36,7 +36,7 @@ class WebServiceInvoker
             // Print or throw an error message/exception.
         }
 
-        // $objects = $objects->;
+
         if (is_null($objects)) {
             echo "The list is empty";
             exit;
