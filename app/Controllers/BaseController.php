@@ -11,6 +11,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use App\Exceptions\BadRequestException;
 use App\Validation\ValidationHelper;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Helpers\WebServiceInvoker;
+
 
 abstract class BaseController
 {
@@ -46,11 +48,18 @@ abstract class BaseController
         );
         try {
             $collection = $this->base_model->$model_func($filters);
+            $api_data = $this->getListOfComposites();
         } catch (\InvalidArgumentException $e) {
             throw new UnprocessableEntityException($request, $e->getMessage());
         }
         $api_data = $this->base_model->$model_func($filters);
         return $this->renderJson($response, $collection);
+    }
+
+    protected function getListOfComposites(string $uri): mixed
+    {
+        $data = WebServiceInvoker::invokeUri($uri);
+        return $data;
     }
 
     /**

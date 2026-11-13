@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Domain\Services\SitesService;
 
+
 class SitesController extends BaseController
 {
     public function __construct(private SitesService $sites_services, private SitesModel $sites_model)
@@ -24,7 +25,8 @@ class SitesController extends BaseController
      */
     public function handleGetSites(Request $request, Response $response, array $uri_args): Response
     {
-        $api_data = $this->sites_model->
+        $api_data = $this->getListOfComposites('https://api.artic.edu/api/v1/places');
+
         return $this->handleGetCollection($request, $response, "getSites", $uri_args);
     }
 
