@@ -291,6 +291,10 @@ abstract class BaseModel
             );
         }
 
+        foreach (array_keys($data) as $column) {
+            $this->validateTableName((string) $column);
+        }
+
         //add columns into comma separated string
         $columns = implode(',', array_keys($data));
 
@@ -333,6 +337,10 @@ abstract class BaseModel
                     "This prevents accidental updates to all records. " .
                     "Please provide conditions like: ['id' => 5] or ['status' => 'active']"
             );
+        }
+
+        foreach (array_merge(array_keys($data), array_keys($where_conditions)) as $column) {
+            $this->validateTableName((string) $column);
         }
 
         //merge data and where together
@@ -380,6 +388,10 @@ abstract class BaseModel
                     "This prevents accidental deletion of all records. " .
                     "Please provide conditions like: ['id' => 5] or ['status' => 'inactive']"
             );
+        }
+
+        foreach (array_keys($where_conditions) as $column) {
+            $this->validateTableName((string) $column);
         }
 
         //collect the values from collection
