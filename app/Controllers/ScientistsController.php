@@ -11,7 +11,7 @@ class ScientistsController extends BaseController
 {
     public function __construct(private ScientistsModel $scientists_model, private ScientistsService $scientists_service)
     {
-        parent::__construct($scientists_model);
+        parent::__construct($scientists_model, $scientists_service);
     }
 
     public function handleGetScientists(Request $request, Response $response): Response

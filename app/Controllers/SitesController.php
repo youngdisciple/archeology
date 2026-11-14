@@ -5,13 +5,13 @@ namespace App\Controllers;
 use App\Domain\Models\SitesModel;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Domain\Services\SitesServices;
+use App\Domain\Services\SitesService;
 
 class SitesController extends BaseController
 {
-    public function __construct(private SitesServices $sites_services, private SitesModel $sites_model)
+    public function __construct(private SitesService $sites_services, private SitesModel $sites_model)
     {
-        parent::__construct($sites_model);
+        parent::__construct($sites_model, $sites_services);
     }
 
 
@@ -64,39 +64,39 @@ class SitesController extends BaseController
     }
 
 
-    //*callbacks for POST
+    //*callback for POST
     /**
-     *
+     * calls the `BaseController`'s universal reusable function `handleCollectionOperation()`
      * @param Request $request
      * @param Response $response
      * @return Response
      */
     public function handleCreateSites(Request $request, Response $response): Response
     {
-        echo "test";
-        //*Retrieve the representation of the collection items that need to be created
-        $payload = $request->getParsedBody();
-        //*Pass the list of new collection items to the Service component to be validated and then inserted into the database
-        $result = $this->sites_services->doCreateSites($payload);
-        $response_data = [];
-        if ($result->isSuccess()) {
-            $code = 201;
-            $response_data = [
-                "code" => $code,
-                "message" => "The list of new sites was properly created!"
-            ];
-            return $this->renderJson($response, $response_data, $code);
-        }
-        if ($result->isFailure()) {
-            $code = 400;
-            $response_data = [
-                "code" => $code,
-                "status" => "error",
-                "message" => "Something went wrong, insertion of the new site was aborted",
-                "details" => $result->getErrors()
-            ];
-            return $this->renderJson($response, $response_data);
-        }
-        return $response;
+        return $this->handleCollectionOperation($request, $response, 'doCreateSites', 'The list of new sites was properly created!', 'Something went wrong, insertion of the new site was aborted', 201);
+    }
+
+    /**
+     * calls the `BaseController`'s universal reusable function `handleCollectionOperation()`
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
+    //*callback for PUT
+    public function handleUpdateSites(Request $request, Response $response): Response
+    {
+        return $this->handleCollectionOperation($request, $response, 'doUpdateSites', "Sites got updated successfully!", "Something went wrong, the update on sites was aborted");
+    }
+
+    /**
+     * calls the `BaseController`'s universal reusable function `handleCollectionOperation()`
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
+    //*callback for DELETE
+    public function handleDeleteSites(Request $request, Response $response): Response
+    {
+        return $this->handleCollectionOperation($request, $response, 'doDeleteSites', "The site was deleted successfully!", "Something went wrong, the site couldn't be deleted and was aborted!");
     }
 }
