@@ -12,11 +12,13 @@ use App\Exceptions\BadRequestException;
 use App\Validation\ValidationHelper;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Helpers\WebServiceInvoker;
+use App\Exceptions\ConflictException;
+use Slim\Exception\HttpNotFoundException;
 
 
 abstract class BaseController
 {
-    public function __construct(private BaseModel $base_model, private BaseService $base_service) {}
+    public function __construct(private BaseModel $base_model, private BaseService $base_service, protected WebServiceInvoker $invoker) {}
 
     protected function renderJson(Response $response, array $data, int $status_code = 200): Response
     {
@@ -35,7 +37,7 @@ abstract class BaseController
      * @throws BadRequestException
      * @return Response
      */
-    protected function handleGetCollection(Request $request, Response $response, string $model_func, array $uri_args): Response
+    protected function handleGetCollection(Request $request, Response $response, string $model_func, string $uri): Response
     {
         $filters = $request->getQueryParams();
         $current_page = $filters["current_page"] ?? "1";
@@ -49,18 +51,28 @@ abstract class BaseController
         );
         try {
             $collection = $this->base_model->$model_func($filters);
-            $api_data = $this->getListOfComposites();
         } catch (\InvalidArgumentException $e) {
             throw new UnprocessableEntityException($request, $e->getMessage());
+        } catch (\RuntimeException $e) {
+            $e->getPrevious() instanceof \PDOException ? throw new ConflictException($request, "The requests cannot be fulfilled due to it causing conflicts in the database!") : throw $e;
         }
-        $api_data = $this->base_model->$model_func($filters);
+        //*calling external API endpoint here
+        //$api_data = $this->getListOfComposites($uri, $filters);
+        //$collection["composite_collection"] = $api_data;
         return $this->renderJson($response, $collection);
     }
 
-    protected function getListOfComposites(string $uri): mixed
+    public function getListOfComposites(string $uri, $filters): mixed
     {
-        $data = WebServiceInvoker::invokeUri($uri);
-        return $data;
+        $object_id = $filters["object_id"] ?? "";
+        $response = [];
+        try {
+            $invoker = new WebServiceInvoker();
+            $response = $invoker->invokeUri("$uri/$object_id");
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        return $response;
     }
 
     /**
@@ -137,11 +149,15 @@ abstract class BaseController
     {
         $body = $request->getParsedBody();
         $payload = is_array($body) ? $body : throw new BadRequestException($request); //making sure body request isn't empty or it causes a 500 error
-        //try{
-        $result = $this->base_service->$service_func($payload);
-        //}catch(){
-
-        //}
+        try {
+            $result = $this->base_service->$service_func($payload);
+        } catch (\OutOfBoundsException $e) {
+            throw new HttpNotFoundException($request, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            throw new UnprocessableEntityException($request, $e->getMessage());
+        } catch (\RuntimeException $e) {
+            $e->getPrevious() instanceof \PDOException ? throw new ConflictException($request, "The requests cannot be fulfilled due to it causing conflicts in the database!") : throw $e;
+        }
         $response_data = [];
         if ($result->isSuccess()) {
             $response_data = [
@@ -151,7 +167,7 @@ abstract class BaseController
             return $this->renderJson($response, $response_data, $success_code);
         }
         if ($result->isFailure()) {
-            throw (new UnprocessableEntityException($request, $err_msg));
+            throw (new BadRequestException($request, $err_msg));
             /*
             $code = 400;
             $response_data = [

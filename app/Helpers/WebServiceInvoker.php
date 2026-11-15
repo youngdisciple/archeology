@@ -22,11 +22,11 @@ class WebServiceInvoker
         try {
             $response = $client->request('GET', $resourceUri, $this->request_options);
         } catch (GuzzleException $ex) {
-            throw new Exception('bad request');
+            throw new Exception($ex);
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new Exception("<br> The request failed for this reason: {$response->getStatusCode()} {$response->getReasonPhrase()}");
+            throw new Exception("The request failed for this reason: {$response->getStatusCode()} {$response->getReasonPhrase()}");
         }
 
         $payload = $response->getBody()->getContents();

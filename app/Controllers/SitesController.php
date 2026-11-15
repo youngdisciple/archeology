@@ -6,13 +6,13 @@ use App\Domain\Models\SitesModel;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Domain\Services\SitesService;
-
+use App\Helpers\WebServiceInvoker;
 
 class SitesController extends BaseController
 {
     public function __construct(private SitesService $sites_services, private SitesModel $sites_model)
     {
-        parent::__construct($sites_model, $sites_services);
+        parent::__construct($sites_model, $sites_services, new WebServiceInvoker());
     }
 
 
@@ -23,11 +23,9 @@ class SitesController extends BaseController
      * @param Response $response
      * @return Response
      */
-    public function handleGetSites(Request $request, Response $response, array $uri_args): Response
+    public function handleGetSites(Request $request, Response $response): Response
     {
-        $api_data = $this->getListOfComposites('https://api.artic.edu/api/v1/places');
-
-        return $this->handleGetCollection($request, $response, "getSites", $uri_args);
+        return $this->handleGetCollection($request, $response, "getSites", 'https://api.artic.edu/api/v1/places');
     }
 
     /**
