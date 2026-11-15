@@ -91,7 +91,7 @@ abstract class BaseController
         }
         $collection = $this->base_model->$model_func((int)$collection_id);
         if ($collection === false) {
-            throw new BadRequestException($request, "There was no ID record for $collection_id");
+            throw new HttpNotFoundException($request, "There was no ID record for $collection_id");
         }
         return $this->renderJson($response, $collection);
     }

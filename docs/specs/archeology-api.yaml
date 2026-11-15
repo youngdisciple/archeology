@@ -331,7 +331,7 @@ paths:
           application/json:
             schema:
               type: array
-              items: { $ref: "#/components/schemas/Site" }
+              items: { $ref: "#/components/schemas/SiteInput" }
             example:
               - site_name: Test Site
                 site_type: Temple
@@ -369,21 +369,21 @@ paths:
           application/json:
             schema:
               type: array
-              items: { $ref: "#/components/schemas/Site" }
-              example:
-                - site_id: 15
-                  site_name: Test Site Updated
-                  site_type: Temple
-                  discovery_date: "2020-05-10"
-                  estimated_age: 3000
-                  longitude: 31.1342
-                  latitude: 29.9792
-                  country: Egypt
-                  region: Giza
-                  description: Updated description
-                  is_protected: true
-                  period_id: 1
-                  culture_id: 1
+              items: { $ref: "#/components/schemas/SiteUpdate" }
+            example:
+              - site_id: 15
+                site_name: Test Site Updated
+                site_type: Temple
+                discovery_date: "2020-05-10"
+                estimated_age: 3000
+                longitude: 31.1342
+                latitude: 29.9792
+                country: Egypt
+                region: Giza
+                description: Updated description
+                is_protected: true
+                period_id: 1
+                culture_id: 1
       responses:
         "200":
           description: OK
@@ -593,7 +593,7 @@ components:
       example: basilica
 
     DiscoveryDateParam:
-      name: discovery_date
+      name: discovery_date_between
       in: query
       required: false
       description: |
@@ -610,7 +610,7 @@ components:
       description: Minimum estimated age in years. Cannot be negative.
       required: false
       schema:
-        type: number
+        type: integer
         minimum: 0
         maximum: 600000000
       example: 4000
@@ -621,7 +621,7 @@ components:
       description: Maximum estimated age in years. Cannot be negative.
       required: false
       schema:
-        type: number
+        type: integer
         minimum: 0
         maximum: 600000000
       example: 10000
@@ -682,10 +682,10 @@ components:
         Field to sort by. Ascending by default; prefix with `-` for descending
         (e.g. `-discovery_date`).
         Sortable fields: site_name, site_type, discovery_date, estimated_age,
-        country, region, latitude, longitude, culture_id, period_id.
+        country, region, culture_id, period_id.
       schema:
         type: string
-        pattern: "^-?(site_name|site_type|discovery_date|estimated_age|country|region|latitude|longitude|culture_id|period_id)$"
+        pattern: "^-?(site_name|site_type|discovery_date|estimated_age|country|region|culture_id|period_id)$"
       example: -estimated_age
 
     SiteId:
@@ -745,10 +745,45 @@ components:
         region: { type: string, nullable: true }
         latitude: { type: number, nullable: true }
         longitude: { type: number, nullable: true }
+        description: { type: string, nullable: true }
         is_protected: { type: boolean }
         culture_id: { type: integer, nullable: true }
         period_id: { type: integer, nullable: true }
       required: [site_id, site_name, site_type, country]
+    SiteInput:
+      type: object
+      required:
+        [
+          site_name,
+          site_type,
+          discovery_date,
+          longitude,
+          latitude,
+          country,
+          region,
+          description,
+          is_protected,
+        ]
+      properties:
+        site_name: { type: string, minLength: 1, maxLength: 85 }
+        site_type: { type: string, minLength: 1, maxLength: 25 }
+        discovery_date: { type: string, format: date }
+        estimated_age: { type: integer, minimum: 0, maximum: 60000000 }
+        longitude: { type: number }
+        latitude: { type: number }
+        country: { type: string, maxLength: 45 }
+        region: { type: string, maxLength: 85 }
+        description: { type: string, maxLength: 1000 }
+        is_protected: { type: boolean }
+        period_id: { type: integer, minimum: 1, maximum: 100 }
+        culture_id: { type: integer, minimum: 1, maximum: 100 }
+    SiteUpdate:
+      allOf:
+        - $ref: "#/components/schemas/SiteInput"
+        - type: object
+          required: [site_id]
+          properties:
+            site_id: { type: integer, minimum: 1 }
     PaginationMeta:
       type: object
       additionalProperties: true
@@ -857,9 +892,8 @@ components:
             {
               code: 415,
               status: Error,
-              message: The server was unable to parse the format of the request.
+              message: The server was unable to parse the format of the request.,
             }
-
 
     ServerError:
       description: Unexpected server error.

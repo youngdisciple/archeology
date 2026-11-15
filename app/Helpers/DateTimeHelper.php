@@ -86,4 +86,14 @@ class DateTimeHelper
         return $parsedDate !== false
             && $parsedDate->format('Y-m-d') === $date;
     }
+
+    /**
+     * Static function to check if a given date is in the future which is useful for anything that has to with archeology since a site, scientist, museum and artifacts in the logical sense can't have "future" properties.
+     * @param string $date
+     * @return bool
+     */
+    public static function isFutureDate(string $date): bool
+    {
+        return self::isValidDate($date) && $date > self::now(self::Y_M_D);
+    }
 }

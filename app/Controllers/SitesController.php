@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Domain\Models\SitesModel;
+use App\Exceptions\UnprocessableEntityException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Domain\Services\SitesService;
+use App\Helpers\DateTimeHelper;
 use App\Helpers\WebServiceInvoker;
 
 class SitesController extends BaseController
@@ -25,6 +27,10 @@ class SitesController extends BaseController
      */
     public function handleGetSites(Request $request, Response $response): Response
     {
+        $dateRange = $request->getQueryParams()['discovery_date_between'] ?? null;
+        if (is_string($dateRange) && DateTimeHelper::isFutureDate(trim(explode(',', $dateRange)[1] ?? ''))) {
+            throw new UnprocessableEntityException($request, "The end date in discovery_date_between cannot be in the future!");
+        }
         return $this->handleGetCollection($request, $response, "getSites", 'https://api.artic.edu/api/v1/places');
     }
 

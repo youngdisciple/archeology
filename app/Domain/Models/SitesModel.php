@@ -37,7 +37,6 @@ class SitesModel extends BaseModel
     public function getSites(array $filters): array
     {
         $data = $this->getCollection($filters, 'archeological_site', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
-
         return $data;
     }
 
