@@ -245,11 +245,11 @@ class MuseumModel extends BaseModel
     }
 
     //* DELETE
-    public function deleteMuseum(array $conditions, int $limit)
+    public function deleteMuseum( int $museum_id, int $limit = 1)
     {
         return $this->delete(
             "museum",
-            $conditions,
+            ["museum_id" => $museum_id],
             $limit
         );
     }

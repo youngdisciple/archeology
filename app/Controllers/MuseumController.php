@@ -44,10 +44,10 @@ class MuseumController extends BaseController
     //* POST
     public function handleCreateMuseum(Request $request, Response $response): Response
     {
-        //* 1. Retrieve the representation of the new collection items to be created.
+        // 1. Retrieve the representation of the new collection items to be created.
         $payload = $request->getParsedBody();
 
-        //* 2. Pass the list of new collection items to the service component to be validated and then inserted into the database.
+        // 2. Pass the list of new collection items to the service component to be validated and then inserted into the database.
         $result = $this->museumService->doCreateMuseums($payload);
 
         $responseData = [];
@@ -57,14 +57,14 @@ class MuseumController extends BaseController
         if ($result->isSuccess()) {
             $responseData = [
                 "code" => 201,
-                "status" => 'Success',
+                "status" => 'Created',
                 "message" => 'The list of new museums was created successfully!'
             ];
         } else if ($result->isFailure()) {
             $code = 400;
             $responseData = [
                 "code" => 400,
-                "status" => 'Error',
+                "status" => 'Bad Request',
                 "message" => 'An error is preventing the insertion of new items into the database.',
                 "description" => $result->getErrors()
             ];
@@ -78,8 +78,61 @@ class MuseumController extends BaseController
     {
         $payload = $request->getParsedBody();
 
-        $museum = $this->museumService->doUpdateMuseums($payload);
-        
+        $result = $this->museumService->doUpdateMuseum($payload);
+
+        $responseData = [];
+        $code = 200;
+
+        // JSON response
+        if ($result->isSuccess()) {
+            $responseData = [
+                "code" => 200,
+                "status" => 'OK',
+                "message" => 'The museum was updated successfully!'
+            ];
+        } else if ($result->isFailure()) {
+            $code = 400;
+            $responseData = [
+                "code" => 400,
+                "status" => 'Bad Request',
+                "message" => 'An error is preventing updating items in the database.',
+                "description" => $result->getErrors()
+            ];
+        }
+
+        return $this->renderJson($response, $responseData, $code);
+
+    }
+
+    //* DELETE
+    public function handleDeleteMuseum(Request $request, Response $response): Response
+    {
+        $payload = $request->getParsedBody();
+
+        $result = $this->museumService->doDeleteMuseum($payload);
+
+        $responseData = [];
+        $code = 200;
+
+        // JSON response
+        if ($result->isSuccess()) {
+            $responseData = [
+                "code" => 200,
+                "status" => 'OK',
+                "message" => 'The museum was deleted successfully!'
+            ];
+        } else if ($result->isFailure()) {
+            $code = 400;
+            $responseData = [
+                "code" => 400,
+                "status" => 'Bad Request',
+                "message" => 'An error is preventing deleting items in the database.',
+                "description" => $result->getErrors()
+            ];
+        }
+
+        return $this->renderJson($response, $responseData, $code);
+
     }
 
 }

@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-use App\Exceptions\BadRequestException;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -39,7 +38,6 @@ class WebServiceInvoker
 
         if (is_null($objects)) {
             throw new Exception("List is empty");
-            exit;
         }
 
         return $objects;
