@@ -136,7 +136,7 @@ abstract class BaseService
         }
         foreach ($delete_collection as $collection) {
             $collection_id = $collection[$id_field];
-            if ($this->base_model->$model_func((int)$collection_id) === 0) { //0 means it wasn't found
+            if ($this->base_model->$model_func((int)$collection_id) === 0) { //0 means it wasn't found and changed
                 throw new \OutOfBoundsException("No resource with $id_field:$collection_id in $collection");
             }
             $this->base_model->$model_func((int)$collection_id);

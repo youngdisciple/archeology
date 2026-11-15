@@ -168,17 +168,6 @@ abstract class BaseController
         }
         if ($result->isFailure()) {
             throw (new BadRequestException($request, $err_msg));
-            /*
-            $code = 400;
-            $response_data = [
-                "code" => $code,
-                "status" => "error",
-                "message" => $err_msg,
-                "details" => $result->getErrors()
-            ];
-
-            return $this->renderJson($response, $response_data, $code);
-            */
         }
         return $response;
     }

@@ -319,6 +319,117 @@ paths:
         "406": { $ref: "#/components/responses/NotAcceptable" }
         "422": { $ref: "#/components/responses/UnprocessableEntity" }
         "500": { $ref: "#/components/responses/ServerError" }
+
+    post:
+      tags: [Sites]
+      summary: Insert a new archeological site record into the archeological site collection
+      operationId: createSite
+      description: Add a new site record to the archeological site table through a request body that gets validated based on certain criteria passed through Valicomb.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/Site" }
+            example:
+              - site_name: Test Site
+                site_type: Temple
+                discovery_date: "2020-05-10"
+                estimated_age: 3000
+                longitude: 31.1342
+                latitude: 29.9792
+                country: Egypt
+                region: Giza
+                description: A test site for error handling
+                is_protected: true
+                period_id: 1
+                culture_id: 1
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              example:
+                code: 201
+                message: The list of new sites was properly created!
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    put:
+      tags: [Sites]
+      summary: Update an existing archeological site record from the archeological site collection
+      operationId: updateSites
+      description: Update a site record by its unique ID through a request body that gets validated based on certain criteria passed through Valicomb.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { $ref: "#/components/schemas/Site" }
+              example:
+                - site_id: 15
+                  site_name: Test Site Updated
+                  site_type: Temple
+                  discovery_date: "2020-05-10"
+                  estimated_age: 3000
+                  longitude: 31.1342
+                  latitude: 29.9792
+                  country: Egypt
+                  region: Giza
+                  description: Updated description
+                  is_protected: true
+                  period_id: 1
+                  culture_id: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              example:
+                code: 200
+                message: Sites got updated successfully!
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    delete:
+      tags: [Sites]
+      summary: Delete an existing archeological site record from the archeological site collection
+      operationId: deleteSites
+      description: Delete a site record by its unique ID through a request body. No validation BESIDES the ID being validated is required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [site_id]
+                properties:
+                  site_id: { type: integer, minimum: 1 }
+            example:
+              - site_id: 15
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              example:
+                code: 200
+                message: The site was deleted successfully!
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
   /sites/{siteId}:
     get:
       tags: [Sites]
@@ -336,6 +447,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "406": { $ref: "#/components/responses/NotAcceptable" }
         "500": { $ref: "#/components/responses/ServerError" }
+
 components:
   parameters:
     MuseumId:
@@ -692,6 +804,7 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
           example: { code: 400, status: Error, message: Malformed resource ID. }
+
     NotFound:
       description: The requested resource was not found.
       content:
@@ -722,6 +835,31 @@ components:
               status: Error,
               message: The server was unable to process the contained instructions,
             }
+
+    Conflict:
+      description: The request could not be completed because it clashes with the current state of the target resource on the server.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            {
+              code: 409,
+              status: Error,
+              message: The server ran into a conflict with the database when trying to run your request.,
+            }
+
+    MediaType:
+      description: The server refused to accept a request because the payload format is not supported
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            {
+              code: 415,
+              status: Error,
+              message: The server was unable to parse the format of the request.
+            }
+
 
     ServerError:
       description: Unexpected server error.
