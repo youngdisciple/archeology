@@ -45,7 +45,6 @@ abstract class BaseService
                 $error_data[] = ['item' => ['Each new item must be an object']];
                 continue;
             }
-
             $collection_rules = new Validator($collection_entry);
             $collection_rules->forFields($validation_rules);
             if (!$collection_rules->validate()) {
@@ -78,6 +77,10 @@ abstract class BaseService
             return Result::failure("The request body must be a non-empty list of items.", []);
         }
         foreach ($updated_collection as $collection_entry) {
+            if (!is_array($collection_entry)) {
+                $error_data[] = ['item' => ['Each new item must be an object']];
+                continue;
+            }
             $collection_rules = new Validator($collection_entry);
             $collection_rules->forFields(array_merge([$id_field => [
                 'required',
@@ -94,6 +97,9 @@ abstract class BaseService
         foreach ($updated_collection as $collection) {
             $collection_id = $collection[$id_field];
             unset($collection[$id_field]);
+            if ($this->base_model->$model_func($collection, (int)$collection_id) === 0) { //0 means it wasn't found
+                throw new \OutOfBoundsException("No resource with $id_field:$collection_id in $collection");
+            }
             $this->base_model->$model_func($collection, (int)$collection_id);
         }
         return Result::success("Collection resource was updated successfully!");
@@ -113,6 +119,10 @@ abstract class BaseService
             return Result::failure("The request body must be a non-empty list of items.", []);
         }
         foreach ($delete_collection as $collection_entry) {
+            if (!is_array($collection_entry)) {
+                $error_data[] = ['item' => ['Each new item must be an object']];
+                continue;
+            }
             $collection_rules = new Validator($collection_entry);
             $collection_rules->forFields([$id_field => [
                 'required',
@@ -128,6 +138,9 @@ abstract class BaseService
         }
         foreach ($delete_collection as $collection) {
             $collection_id = $collection[$id_field];
+            if ($this->base_model->$model_func((int)$collection_id) === 0) { //0 means it wasn't found and changed
+                throw new \OutOfBoundsException("No resource with $id_field:$collection_id in $collection");
+            }
             $this->base_model->$model_func((int)$collection_id);
         }
         return Result::success("Collection resource deleted successfully!");
