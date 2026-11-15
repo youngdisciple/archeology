@@ -4,80 +4,82 @@ namespace App\Domain\Services;
 use App\Domain\Models\MuseumModel;
 use App\Helpers\Core\Result;
 
+/**
+ * MuseumService
+ *
+ * This class implements the logic and validation for museum operations.
+ *
+ * It defines the validation rules according to the database schema, and coordinates the creation, updating, and deletion of records through the model.
+ */
+
 class MuseumService extends BaseService
 {
-    public function __construct(private MuseumModel $museumModel) {}
+   private const MUSEUM_RULES = [
+        'museum_name' => ['required', ['regex', '/^[a-z ]+$/ix']],
+        'city' => ['optional', ['regex', '/^[a-z ]+$/ix']],
+        'foundation_date' => ['optional', 'date', ['dateFormat', 'Y-m-d']],
+        'website' => ['optional', 'url'],
+        'museum_type' => ['optional', ['regex', '/^[a-z ]+$/ix'] ]
+    ];
+
+
+    /**
+     * __construct
+     *
+     * Initialize the service with dependency on the model
+     *
+     * @param MuseumModel $museumModel
+     * @return void
+     */
+
+    public function __construct(MuseumModel $museumModel)
+    {
+        parent::__construct($museumModel);
+    }
+
+    /**
+     * doCreateMuseums
+     *
+     * validate and create the submitted data through a reusable function in the base service
+     *
+     * @param array $museums The submitted data to be created
+     * @return Result Result indicating success or containing validation errors
+     */
 
     public function doCreateMuseums(array  $museums): Result {
 
-        $errors = [];
-        $created_item_ids =[];
-
-        //* 1. Process the list of items to be created
-        //TODO: Validate the item fields according to the data integrity rules you have in the database schema
-        //TODO: USE a foreach to process the list
-        //! Add error details to the $errors
-        foreach ($museums as $newMuseums) {
-            // required field + varchar(150)
-            if (empty($newMuseums['museum_name'])){
-                $errors[] = "The field 'museum_name' is required";
-            } elseif (strlen($newMuseums['museum_name']) > 150 ) {
-                $errors[] = "The field 'museum_name' cannot exceed 150 characters";
-            }
-
-            // optional field + varchar(100)
-            if (isset($newMuseums['city']) && strlen($newMuseums['city']) > 100 ) {
-                $errors[] = "The field 'city' cannot exceed 100 characters";
-            }
-
-            // optional field + format = YYYY-MM-DD
-            if (isset($newMuseums['foundation_date']) ) {
-                $date = $newMuseums['foundation_date'];
-                $parts = explode('-', $date);
-                if(!checkdate($parts[1], $parts[2], $parts[0])){
-                    $errors[] = "Enter a valid date in the format YYYY-MM-DD";
-                }
-            }
-        }
-
-        // $newMuseum = $newMuseums[0]; only inserts one item
-        $last_inserted_id = $this->museumModel->createMuseum($newMuseums);
-
-        //TODO: add the $last_inserted_id to the $created_items_ids array
-        $created_item_ids [] = $last_inserted_id;
-        //NOTE: you can return the last inserted ID.
-        //? NOTE: In case of a successful insertion -> collect and return the last inserted IDs
-        return Result::success("The new museums were created successfully!", $created_item_ids);
+        return $this->doCreateCollection($museums, self::MUSEUM_RULES, 'createMuseum');
     }
 
 
     //TODO: Add two new public methods: One for the update operation and one for delete operation.
 
+    /**
+     * doUpdateMuseum
+     *
+     * validate and update the submitted data through a reusable function in the base service
+     *
+     * @param array $museums The submitted data to be updated
+     * @return Result Result indicating success or containing validation errors
+     */
+
     public function doUpdateMuseum(array $museums) : Result {
 
-        $errors = [];
-        //TODO: unset/remove the museum id from the array to be passed to the model before calling the model's update method
-        foreach($museums as $museum){
-            //TODO: validate
-            $museum_id = $museum['museum_id'];
-            unset($museum['museum_id']);
-            $this->museumModel->updateMuseum($museum, $museum_id);
-        }
-
-        return Result::success("The museums have been updated successfully!", $museums);
+        return $this->doUpdateCollection($museums, self::MUSEUM_RULES, 'museum_id', 'updateMuseums');
     }
+
+    /**
+     * doDeleteMuseum
+     *
+     * delete the submitted data, by its museum ID, through a reusable function in the base service
+     *
+     * @param array $museums The submitted data to be deleted
+     * @return Result Result indicating success or containing validation errors
+     */
 
     public function doDeleteMuseum(array $museums) : Result {
 
-        $errors = [];
-        foreach($museums as $museum){
-            //TODO: validate
-            $museum_id = $museum['museum_id'];
-            unset($museum['museum_id']);
-            $this->museumModel->deleteMuseum($museum_id, 1);
-        }
-
-        return Result::success("The museum has been deleted successfully!", $museums);
+        return $this->doDeleteCollection($museums, 'museum_id', 'deleteMuseums');
     }
 
 }

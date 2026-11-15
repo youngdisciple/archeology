@@ -24,7 +24,9 @@ abstract class BaseService
     /**
      * @param BaseModel $base_model a dependency injection of the base model is needed
      */
-    protected function __construct(protected BaseModel $base_model) {}
+    protected function __construct(protected BaseModel $base_model) {
+       
+    }
 
     /**
      * A reusable function that is applicable to all children of the `BaseService` and handles insertion and validation if a collection into the database
