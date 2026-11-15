@@ -70,6 +70,111 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "406": { $ref: "#/components/responses/NotAcceptable" }
         "500": { $ref: "#/components/responses/ServerError" }
+
+    post:
+      tags: [Museums]
+      summary: Create new museum records
+      operationId: createMuseums
+      description: |
+        Creates one or more museum records using the provided
+        request body. Each museum is validated against the
+        application rules before being inserted into the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/MuseumInput"
+            example:
+              - museum_name: National Museum of History
+                city: Montreal
+                foundation_date: "1985-06-15"
+                website: https://example.org
+                museum_type: History
+              - museum_name: Archaeology Museum
+                city: Toronto
+                foundation_date: "1990-03-20"
+                museum_type: Archaeology
+      responses:
+        "201":
+          description: Museums created successfully.
+          content:
+            application/json:
+              example:
+                code: 201
+                status: Created
+                message: The list of new museums was created successfully!
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    put:
+      tags: [Museums]
+      summary: Update existing museum records
+      operationId: updateMuseums
+      description: |
+        Updates existing museum records identified by their
+        unique museum IDs. The request body contains the
+        museum data to be updated, which is validated
+        before being saved to the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/MuseumUpdate"
+            example:
+              - museum_id: 1
+                museum_name: Updated History Museum
+                city: Montreal
+                foundation_date: "1985-06-15"
+                website: https://example.org
+                museum_type: History
+      responses:
+        "200":
+          description: Museums updated successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                status: OK
+                message: The museum was updated successfully!
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    delete:
+      tags: [Museums]
+      summary: Delete existing museum records
+      operationId: deleteMuseums
+      description: |
+        Deletes museum records identified by their unique
+        museum IDs. The request body must contain a valid
+        museum ID for each record to be deleted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/MuseumDelete"
+            example:
+              - museum_id: 1
+              - museum_id: 2
+      responses:
+        "200":
+          description: Museums deleted successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                status: OK
+                message: The museum was deleted successfully!
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /museums/{museumId}:
     get:
       tags: [Museums]
@@ -706,6 +811,44 @@ components:
         foundation_date: { type: string, format: date, nullable: true }
         website: { type: string, nullable: true }
         museum_type: { type: string, nullable: true }
+    MuseumInput:
+        type: object
+        description: Museum data submitted for creation.
+        required: [museum_name]
+        properties:
+          museum_name:
+            type: string
+            minLength: 1
+            pattern: '^[a-zA-Z ]+$'
+          city:
+            type: string
+            pattern: '^[a-zA-Z ]+$'
+          foundation_date:
+            type: string
+            format: date
+          website:
+            type: string
+            format: uri
+          museum_type:
+            type: string
+            pattern: '^[a-zA-Z ]+$'
+    MuseumUpdate:
+        allOf:
+          - $ref: "#/components/schemas/MuseumInput"
+          - type: object
+            required: [museum_id]
+            properties:
+              museum_id:
+                type: integer
+                minimum: 1
+    MuseumDelete:
+        type: object
+        description: Identifies a museum to delete.
+        required: [museum_id]
+        properties:
+          museum_id:
+            type: integer
+            minimum: 1
     Scientist:
       type: object
       description: Scientist object
