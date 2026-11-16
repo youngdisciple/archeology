@@ -64,7 +64,31 @@ For the exact route list, request formats, and response schemas, consult the pro
 - A compatible web server (or PHP's built-in development server)
 
 ### Installation
-    
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/youngdisciple/archeology.git
+   cd archeology
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   composer install
+   ```
+
+3. Copy `config/env.example.php` to `config/env.php` and configure the database connection for your local environment.
+
+4. Import the project's database schema and any required seed data.
+
+5. Start the application using the project's development command:
+
+   ```bash
+   composer start
+   ```
+
+   Alternatively, configure the project through Apache, Nginx, or the supplied Docker setup. The API base URL depends on your environment.
 
 ## Example Requests
 
@@ -128,3 +152,37 @@ Accept: application/json
 ```
 
 These examples illustrate the request format. Resource-specific required fields and supported operations are defined in the OpenAPI documentation.
+
+
+## External API Integration (Composite Resources)
+
+The Archaeology API integrates multiple external web services to enrich its local collections with additional archaeological, historical, and cultural information.
+
+These integrations allow the API to retrieve data from third-party sources and combine it with locally stored records, providing clients with more comprehensive information through a single request.
+
+### External APIs
+
+The following external APIs are integrated into the project:
+
+| External API | Description | Documentation |
+|---|---|---|
+| Metropolitan Museum of Art API | Provides information about artworks, historical objects, and cultural artifacts. | [Documentation](https://metmuseum.github.io/) |
+| *Additional API* | *Description* | *Documentation* |
+| *Additional API* | *Description* | *Documentation* |
+| *Additional API* | *Description* | *Documentation* |
+
+### How It Works
+
+1. A client sends a request to an Archaeology API endpoint.
+2. The application retrieves the relevant records from its local database.
+3. An HTTP request is sent to the corresponding external API.
+4. The external data is retrieved and incorporated into the local response.
+5. The combined data is returned to the client in JSON format.
+
+### Implementation
+
+External API integrations are handled through the `WebServiceInvoker` helper, which facilitates HTTP communication with third-party services.
+
+Each integration retrieves information relevant to its corresponding resource collection. The retrieved data is incorporated into the API response without requiring clients to communicate directly with the external services.
+
+This approach improves the API's functionality by combining multiple data sources into a unified interface.
