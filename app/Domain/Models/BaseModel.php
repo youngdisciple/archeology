@@ -353,14 +353,14 @@ abstract class BaseModel
         //setup fields
         $field_parts = [];
         foreach ($data as $key => $value) {
-            $field_parts[] = "$key = ?";
+            $field_parts[] = "`$key` = ?";
         }
         $field_details = implode(', ', $field_parts);
 
         //setup where
         $where_parts = [];
         foreach ($where_conditions as $key => $value) {
-            $where_parts[] = "$key = ?";
+            $where_parts[] = "`$key` = ?";
         }
         $where_details = implode(' AND ', $where_parts);
 
