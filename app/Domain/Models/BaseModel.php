@@ -296,10 +296,11 @@ abstract class BaseModel
         }
 
         //add columns into comma separated string
-        $columns = implode(',', array_keys($data));
+        $columns = implode(',', array_map(fn($s) => "`$s`", array_keys($data)));
 
         //get values
         $values = array_values($data);
+
 
         $placeholders = str_repeat('?,', count($data));
         $placeholders = rtrim($placeholders, ',');
