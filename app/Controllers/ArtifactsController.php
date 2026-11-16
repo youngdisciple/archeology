@@ -49,7 +49,7 @@ class ArtifactsController extends BaseController
 
         $artifacts = $this->artifactsModel->getArtifacts($params);
 
-        $artifactName2 = $params['artifact_name_2'];
+        $artifactName2 = $params['artifact_name_2'] ?? null;
         if (!empty($artifactName2)) {
             $artifacts['related_data_api'] = $this->getApiArtifacts($artifactName2);
         }

@@ -156,6 +156,8 @@ class ValidationHelper
                     "Invalid parameter value ({$param} => {$v})"
                 );
             }
+
+            $params[$param] = $v;
         }
 
         return $params;

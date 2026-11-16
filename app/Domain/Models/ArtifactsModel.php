@@ -27,8 +27,8 @@ class ArtifactsModel extends BaseModel
         $sqlQueries = [
             'artifact_name' => "artifact_name LIKE CONCAT('%', :artifact_name, '%')",
             'over_estimated_value' => "estimated_value >= :over_estimated_value",
-            'under_estimated_value' => "estimated_value <= :over_estimated_value",
-            'artifact_type' => "artifact_type = LIKE CONCAT('%', :artifact_type, '%')",
+            'under_estimated_value' => "estimated_value <= :under_estimated_value",
+            'artifact_type' => "artifact_type LIKE CONCAT('%', :artifact_type, '%')",
             'museum_id' => "museum_id = :museum_id",
             'condition' => "`condition` = :condition" // NOTE: backticks
         ];
