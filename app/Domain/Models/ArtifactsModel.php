@@ -58,4 +58,46 @@ class ArtifactsModel extends BaseModel
 
         return $this->fetchSingle($sql, ['artifact_id' => $artifact_id]);
     }
+
+    function createArtifacts(array $artifacts): mixed
+    {
+        $ids = [];
+
+        foreach($artifacts as $artifact) {
+            $id = $this->insert('artifacts', $artifact);
+            array_push($ids, $id);
+        }
+
+        return $ids;
+    }
+
+    public function updateArtifacts(array $artifacts) : mixed
+    {
+        $updatedRows = 0;
+
+        foreach($artifacts as $artifact) {
+            $id = $artifact['artifact_id'];
+            unset($artifact['artifact_id']);
+            $updatedRows += $this->update(
+                'artifacts',
+                $artifact,
+                ['artifact_id' => $id]
+            );
+        }
+
+        return  $updatedRows;
+    }
+
+    public function deleteArtifacts(array $artifact_ids) {
+        $updatedRows = 0;
+
+        foreach($artifact_ids as $artifact_id) {
+            $updatedRows += $this->delete(
+                'artifacts',
+                ['artifact_id' => $artifact_id]
+            );
+        }
+
+        return $updatedRows;
+    }
 }

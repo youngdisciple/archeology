@@ -84,4 +84,7 @@ return static function (Slim\App $app): void {
     // GET ROUTES FOR ARTIFACTS
     $app->get('/artifacts', [ArtifactsController::class, 'index']);
     $app->get('/artifacts/{artifact_id}', [ArtifactsController::class, 'show']);
+    $app->post('/artifacts', [ArtifactsController::class, 'createArtifacts']);
+    $app->put('/artifacts', [ArtifactsController::class, 'updateArtifacts']);
+    $app->delete('/artifacts', [ArtifactsController::class, 'deleteArtifacts']);
 };

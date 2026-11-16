@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Domain\Models\ArtifactsModel;
+use App\Domain\Services\ArtifactsService;
 use App\Helpers\WebServiceInvoker;
 use App\Validation\ValidationHelper;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -12,7 +13,7 @@ use Slim\Exception\HttpNotFoundException;
 
 class ArtifactsController extends BaseController
 {
-    public function __construct( private ArtifactsModel $artifactsModel ) {}
+    public function __construct( private ArtifactsModel $artifactsModel, private ArtifactsService $artifactsService ) {}
 
 
     /**
@@ -87,6 +88,114 @@ class ArtifactsController extends BaseController
         return $this->renderJson($response, $artifact);
     }
 
+    public function createArtifacts(Request $request, Response $response, array $args): Response {
+        $payload = $request->getParsedBody();
+
+        if (empty($payload)) {
+            throw new HttpBadRequestException(
+                $request,
+                'The payload must contain at least 1 artifact.'
+            );
+        }
+
+        $result = $this->artifactsService->doCreateArtifacts($payload);
+
+        $responseData = [];
+        $code = 201;
+
+        // JSON response
+        if ($result->isSuccess()) {
+            $responseData = [
+                "code" => 201,
+                "status" => 'Success',
+                "message" => 'The list of new artifact(s) was created successfully!'
+            ];
+        } else{
+            $code = 400;
+            $responseData = [
+                "code" => 400,
+                "status" => 'Error',
+                "message" => 'An error is preventing the insertion of new items into the database.',
+                "description" => $result->getErrors()
+            ];
+        }
+
+        return $this->renderJson($response, $responseData, $code);
+    }
+
+    public function updateArtifacts(Request $request, Response $response, array $args): Response {
+        $payload = $request->getParsedBody();
+
+        if (empty($payload)) {
+            throw new HttpBadRequestException(
+                $request,
+                'The payload must contain at least 1 artifact.'
+            );
+        }
+
+        $result = $this->artifactsService->doUpdateArtifacts($payload);
+
+        $responseData = [];
+        $code = 200;
+
+        // JSON response
+        if ($result->isSuccess()) {
+            $responseData = [
+                "code" => 200,
+                "status" => 'OK',
+                "message" => 'The list of new artifact(s) was updated successfully',
+                'description' => $result->getData()
+            ];
+        } else{
+            $code = 400;
+            $responseData = [
+                "code" => 400,
+                "status" => 'Error',
+                "message" => 'An error is preventing the database to update the artifacts',
+                "description" => $result->getErrors()
+            ];
+        }
+
+        return $this->renderJson($response, $responseData, $code);
+    }
+
+    public function deleteArtifacts(Request $request, Response $response, array $args): Response {
+        $payload = $request->getParsedBody();
+
+        if (empty($payload)) {
+            throw new HttpBadRequestException(
+                $request,
+                'The payload must contain at least 1 artifact.'
+            );
+        }
+
+        $result = $this->artifactsService->doDeleteArtifacts($payload);
+
+        $responseData = [];
+        $code = 200;
+
+        // JSON response
+        if ($result->isSuccess()) {
+            $responseData = [
+                "code" => 200,
+                "status" => 'OK',
+                "message" => 'The artifacts were deleted successfully',
+                'description' => $result->getData()
+            ];
+        } else{
+            $code = 400;
+            $responseData = [
+                "code" => 400,
+                "status" => 'Error',
+                "message" => 'An error is preventing the database to delete the artifacts',
+                "description" => $result->getErrors()
+            ];
+        }
+
+        return $this->renderJson($response, $responseData, $code);
+    }
+
+    // FIX : polish composite resource
     /**
      * Fetches artifacts from the external API
      * @param string $q
