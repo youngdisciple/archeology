@@ -64,13 +64,28 @@ class AboutController extends BaseController
                     [
                         'path' => '/museums',
                         'methods' => [
-                            'GET' => 'List museums'
+                            'GET' => 'List museums',
+                            'POST' => 'Create museum(s) from the request body',
+                            'PUT' => 'Update existing museum(s) from the request body',
+                            'DELETE' => 'Delete existing museum(s) from the request body'
                         ]
                     ],
                     [
                         'path' => '/museums/{museum_id}',
                         'methods' => [
                             'GET' => 'Show a specific museum'
+                        ]
+                    ],
+                    [
+                        'path' => '/museums/{museum_id}/scientists',
+                        'methods' => [
+                            'GET' => 'List scientists associated with a specific museum'
+                        ]
+                    ],
+                    [
+                        'path' => '/museums/{museum_id}/artifacts',
+                        'methods' => [
+                            'GET' => 'List artifacts belonging to a specific museum'
                         ]
                     ]
                 ],
