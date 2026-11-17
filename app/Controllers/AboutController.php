@@ -44,7 +44,10 @@ class AboutController extends BaseController
                     [
                         'path' => '/sites',
                         'methods' => [
-                            'GET' => 'List archeological sites'
+                            'GET' => 'List archeological sites',
+                            'POST' => 'Create archeological site(s) from the request body',
+                            'PUT' => 'Update an existing archeological site(s) record from the request body',
+                            'DELETE' => 'Delete an existing archeological site(s) record from the request body'
                         ]
                     ],
                     [
