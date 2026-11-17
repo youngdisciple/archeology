@@ -377,6 +377,265 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "406": { $ref: "#/components/responses/NotAcceptable" }
         "500": { $ref: "#/components/responses/ServerError" }
+  /scientists:
+    get:
+      tags: [Scientists]
+      operationId: listScientists
+      summary: List scientists
+      description: Returns a filtered, sorted, paginated collection of scientists. Name and specialization use exact-value matching.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - name: first_name
+          in: query
+          description: Exact scientist first name.
+          schema: { type: string }
+        - name: specialization
+          in: query
+          description: Exact specialization.
+          schema: { type: string }
+        - name: is_active
+          in: query
+          description: Filter on active status. Accepts true, false, 1, or 0.
+          schema: { type: string, enum: ["true", "false", "1", "0"] }
+        - name: min_experience
+          in: query
+          description: Minimum years of experience (inclusive).
+          schema: { type: integer, minimum: 0, maximum: 69 }
+        - name: max_experience
+          in: query
+          description: Maximum years of experience (inclusive).
+          schema: { type: integer, minimum: 1, maximum: 70 }
+        - name: has_degree
+          in: query
+          description: Exact degree.
+          schema: { type: string, enum: [BA, BSc, MA, MSc, PhD] }
+        - $ref: "#/components/parameters/ScientistSort"
+      responses:
+        "200":
+          description: Scientist Collection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScientistCollection" }
+              example:
+                meta: { page: 1, page_size: 10, total_records: 1 }
+                data:
+                  - scientist_id: 1
+                    first_name: Jane
+                    last_name: Doe
+                    degree: PhD
+                    specialization: Egyptology
+                    museum_id: 1
+                    years_of_experience: 12
+                    is_active: true
+                    biography: Field archaeologist specializing in Egyptian burial sites.
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    post:
+      tags: [Scientists]
+      summary: Create new scientist records
+      operationId: createScientists
+      description: |
+        Creates one or more scientist records using the provided
+        request body. Each scientist is validated with Valicomb
+        before being inserted into the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ScientistInput"
+            example:
+              - first_name: Jane
+                last_name: Doe
+                degree: PhD
+                specialization: Egyptology
+                museum_id: 1
+                years_of_experience: 12
+                is_active: true
+                biography: Field archaeologist specializing in Egyptian burial sites.
+              - first_name: Marc
+                last_name: Tremblay
+                degree: MSc
+                specialization: Classical Archaeology
+                years_of_experience: 4
+                is_active: 1
+      responses:
+        "201":
+          description: Scientists created successfully.
+          content:
+            application/json:
+              example:
+                code: 201
+                message: The list of scientists were properly created
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    put:
+      tags: [Scientists]
+      summary: Update existing scientist records
+      operationId: updateScientists
+      description: |
+        Updates existing scientist records identified by their
+        unique scientist IDs. The request body contains the
+        scientist data to be updated, which is validated with
+        Valicomb before being saved to the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ScientistUpdate"
+            example:
+              - scientist_id: 1
+                first_name: Jane
+                last_name: Doe
+                degree: PhD
+                specialization: Egyptology
+                museum_id: 2
+                years_of_experience: 13
+                is_active: true
+                biography: Updated biography.
+      responses:
+        "200":
+          description: Scientists updated successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                message: The list of scientists were properly updated
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    delete:
+      tags: [Scientists]
+      summary: Delete existing scientist records
+      operationId: deleteScientists
+      description: |
+        Deletes scientist records identified by their unique
+        scientist IDs. The request body must contain a valid
+        scientist ID for each record to be deleted. A scientist
+        that is still linked to an excavation cannot be deleted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ScientistDelete"
+            example:
+              - scientist_id: 1
+              - scientist_id: 2
+      responses:
+        "200":
+          description: Scientists deleted successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                message: The list of scientists were properly deleted
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /scientists/{scientistId}:
+    get:
+      tags: [Scientists]
+      operationId: getScientistById
+      summary: Get a scientist by ID
+      parameters:
+        - $ref: "#/components/parameters/ScientistId"
+      responses:
+        "200":
+          description: Scientist found.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Scientist" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /scientists/{scientistId}/excavations:
+    get:
+      tags: [Scientists]
+      operationId: listScientistExcavations
+      summary: List excavations a scientist was involved in
+      description: Project name uses "contains" matching. Returns 400 if the scientist does not exist.
+      parameters:
+        - $ref: "#/components/parameters/ScientistId"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - name: project_name
+          in: query
+          description: Partial match on project name.
+          schema: { type: string }
+        - name: start_date_after
+          in: query
+          description: Started on or after this date (inclusive).
+          schema: { type: string, format: date }
+        - name: start_date_before
+          in: query
+          description: Started on or before this date (inclusive).
+          schema: { type: string, format: date }
+        - name: start_date_between
+          in: query
+          description: Comma-separated inclusive date range, YYYY-MM-DD,YYYY-MM-DD. Do not combine with after or before.
+          schema:
+            { type: string, pattern: '^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$' }
+        - name: min_budget
+          in: query
+          description: Lower budget bound
+          schema: { type: number, format: float, minimum: 0, maximum: 100000000 }
+        - name: max_budget
+          in: query
+          description: Upper budget bound
+          schema: { type: number, format: float, minimum: 1, maximum: 99999999 }
+        - name: sort
+          in: query
+          description: Prefix an allowed column name with '-' for descending order.
+          schema:
+            type: string
+            enum:
+              [
+                project_name,
+                "-project_name",
+                start_date,
+                "-start_date",
+                end_date,
+                "-end_date",
+                budget,
+                "-budget",
+                area_excavated_m2,
+                "-area_excavated_m2",
+                team_size,
+                "-team_size",
+              ]
+      responses:
+        "200":
+          description: Excavations for the scientist
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ExcavationCollection" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /sites:
     get:
       tags: [Sites]
@@ -800,6 +1059,34 @@ components:
       description: Positive integer site identifier.
       schema: { type: integer, minimum: 1 }
       example: 5
+
+    ScientistId:
+      name: scientistId
+      in: path
+      required: true
+      description: Positive integer scientist identifier.
+      schema: { type: integer, minimum: 1 }
+      example: 1
+
+    ScientistSort:
+      name: sort
+      in: query
+      description: Sort by field, ascending by default. Prefix with '-' for descending.
+      schema:
+        type: string
+        enum:
+          [
+            first_name,
+            "-first_name",
+            last_name,
+            "-last_name",
+            specialization,
+            "-specialization",
+            degree,
+            "-degree",
+            years_of_experience,
+            "-years_of_experience",
+          ]
   schemas:
     Museum:
       type: object
@@ -862,6 +1149,88 @@ components:
         years_of_experience: { type: integer, nullable: true }
         is_active: { type: boolean }
         biography: { type: string, nullable: true }
+    ScientistInput:
+      type: object
+      description: Scientist data submitted for creation.
+      required:
+        [first_name, last_name, degree, specialization, years_of_experience, is_active]
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: ASCII characters only.
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: ASCII characters only.
+        degree:
+          type: string
+          enum: [BA, BSc, MA, MSc, PhD]
+        specialization:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: ASCII characters only.
+        museum_id:
+          type: integer
+          minimum: 1
+          description: Must reference an existing museum.
+        years_of_experience:
+          type: integer
+          minimum: 1
+          maximum: 80
+        is_active:
+          description: Accepts true, false, 1, or 0.
+          oneOf:
+            - type: boolean
+            - type: integer
+              enum: [0, 1]
+        biography:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          description: ASCII characters only.
+    ScientistUpdate:
+      allOf:
+        - $ref: "#/components/schemas/ScientistInput"
+        - type: object
+          required: [scientist_id]
+          properties:
+            scientist_id:
+              type: integer
+              minimum: 1
+    ScientistDelete:
+      type: object
+      description: Identifies a scientist to delete.
+      required: [scientist_id]
+      properties:
+        scientist_id:
+          type: integer
+          minimum: 1
+    Excavation:
+      type: object
+      description: Excavation object
+      properties:
+        excavation_id: { type: integer }
+        project_name: { type: string }
+        start_date: { type: string, format: date, nullable: true }
+        end_date: { type: string, format: date, nullable: true }
+        budget: { type: number, format: float, nullable: true }
+        area_excavated_m2: { type: number, format: float, nullable: true }
+        team_size: { type: integer, nullable: true }
+        notes: { type: string, nullable: true }
+        site_id: { type: integer }
+        scientist_id: { type: integer }
+    ExcavationCollection:
+      type: object
+      properties:
+        meta: { $ref: "#/components/schemas/PaginationMeta" }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/Excavation" }
+      required: [meta, data]
     Artifact:
       type: object
       description: Artifact object
