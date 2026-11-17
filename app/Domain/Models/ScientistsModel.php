@@ -4,14 +4,13 @@ namespace App\Domain\Models;
 
 use App\Domain\Models\BaseModel;
 
-/**
- * The model that handles the sql statements for the api
- */
 class ScientistsModel extends BaseModel
 {
     /**
-     * Fetches the list of all scientists
+     * Fetches the list of all scientists.
+     *
      * @param array $filters The array that features all filters for the scientists table
+     *
      * @return array the array that gives all the scientists according to the filtered result
      */
     public function getScientists(array $filters): array
@@ -55,7 +54,8 @@ class ScientistsModel extends BaseModel
         ];
 
         $sortableFields = [
-            'name',
+            'first_name',
+            'last_name',
             'specialization',
             'degree',
             'years_of_experience'
@@ -65,8 +65,10 @@ class ScientistsModel extends BaseModel
     }
 
     /**
-     * Returns one scientist based off the provided ID
+     * Returns one scientist based off the provided ID.
+     *
      * @param int $scientist_id The user provided ID for the scientist they want
+     *
      * @return array|false returns the scientist that the user requested or false if the scientist does not exist
      */
     public function getScientistById(int $scientist_id): array | false
@@ -74,12 +76,19 @@ class ScientistsModel extends BaseModel
         return $this->getCollectionById($scientist_id, 'scientist', 'scientist_id');
     }
 
+    /**
+     * Fetches the list of excavations that a scientist was involved in.
+     *
+     * @param array $filters The array that features all filters for the excavations sub-collection
+     * @param int $scientist_id The ID of the parent scientist
+     *
+     * @return array|false the filtered list of excavations or false if the scientist does not exist
+     */
     public function getScientistExcavation(
         array $filters,
         int $scientist_id
     ): array|false {
 
-        // Verify that the parent museum exists.
         if ($this->getScientistById($scientist_id) === false) {
             return false;
         }
@@ -136,11 +145,39 @@ class ScientistsModel extends BaseModel
     }
 
     /**
-     * Creates scientist based on user provided data
-     * @param array $scientist The JSON array that contains all of the data for new scientists
+     * Creates a scientist based on user provided data.
+     *
+     * @param array $scientist The array that contains all of the data for the new scientist
+     *
+     * @return mixed the ID of the newly inserted scientist
      */
     public function createScientist(array $scientist)
     {
         return $this->insert("scientist", $scientist);
+    }
+
+    /**
+     * Updates an existing scientist.
+     *
+     * @param array $scientist The array that contains the new data for the scientist
+     * @param int $scientist_id The ID of the scientist to update
+     *
+     * @return int the number of rows that were affected, 0 if no scientist was updated
+     */
+    public function updateScientist(array $scientist, int $scientist_id)
+    {
+        return $this->update('scientist', $scientist, ['scientist_id' => $scientist_id]);
+    }
+
+    /**
+     * Deletes a scientist.
+     *
+     * @param int $scientist_id The ID of the scientist to delete
+     *
+     * @return int the number of rows that were deleted, 0 if no scientist exists with that ID
+     */
+    public function deleteScientist(int $scientist_id)
+    {
+        return $this->delete('scientist', ['scientist_id' => $scientist_id]);
     }
 }
