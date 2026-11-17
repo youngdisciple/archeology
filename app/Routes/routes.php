@@ -48,8 +48,9 @@ return static function (Slim\App $app): void {
     $app->get('/museums/{collection_id}', [MuseumController::class, 'handleGetMuseumById']);
     $app->get('/museums/{parent_collection_id}/scientists', [MuseumController::class, 'handleGetMuseumScientist']);
     $app->get('/museums/{parent_collection_id}/artifacts', [MuseumController::class, 'handleGetMuseumArtifact']);
-
     $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
+    $app->put('/museums', [MuseumController::class, 'handleUpdateMuseum']);
+    $app->delete('/museums', [MuseumController::class, 'handleDeleteMuseum']);
 
     // Example route to test error handling.
     $app->get('/error', function (Request $request, Response $response, $args) {

@@ -9,7 +9,7 @@ class SitesModel extends BaseModel
         'site_type' => ['column' => 'site_type', 'type' => 'contains'],
         'discovery_date_between' => ['column' => 'discovery_date', 'type' => 'date_between'],
         'age_min' => ['column' => 'estimated_age', 'type' => 'min', 'minAllowed' => 0, 'maxAllowed' => 600000000],
-        'age_max' => ['column' => 'site_name', 'type' => 'min', 'minAllowed' => 0, 'maxAllowed' => 600000000],
+        'age_max' => ['column' => 'estimated_age', 'type' => 'max', 'minAllowed' => 0, 'maxAllowed' => 600000000],
         'country' => ['column' => 'country', 'type' => 'contains'],
         'region' => ['column' => 'region', 'type' => 'contains'],
         'is_protected' => ['column' => 'is_protected', 'type' => 'boolean'],
@@ -36,7 +36,8 @@ class SitesModel extends BaseModel
      */
     public function getSites(array $filters): array
     {
-        return $this->getCollection($filters, 'archeological_site', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
+        $data = $this->getCollection($filters, 'archeological_site', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
+        return $data;
     }
 
     /**

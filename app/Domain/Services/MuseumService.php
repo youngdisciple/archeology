@@ -4,35 +4,82 @@ namespace App\Domain\Services;
 use App\Domain\Models\MuseumModel;
 use App\Helpers\Core\Result;
 
+/**
+ * MuseumService
+ *
+ * This class implements the logic and validation for museum operations.
+ *
+ * It defines the validation rules according to the database schema, and coordinates the creation, updating, and deletion of records through the model.
+ */
+
 class MuseumService extends BaseService
 {
-    public function __construct(private MuseumModel $museumModel) {}
+   private const MUSEUM_RULES = [
+        'museum_name' => ['required', ['regex', '/^[a-z ]+$/ix']],
+        'city' => ['optional', ['regex', '/^[a-z ]+$/ix']],
+        'foundation_date' => ['optional', 'date', ['dateFormat', 'Y-m-d']],
+        'website' => ['optional', 'url'],
+        'museum_type' => ['optional', ['regex', '/^[a-z ]+$/ix'] ]
+    ];
 
-    public function doCreateMuseums(array  $newMuseums): Result {
 
-        $errors = [];
-        $created_item_ids =[];
+    /**
+     * __construct
+     *
+     * Initialize the service with dependency on the model
+     *
+     * @param MuseumModel $museumModel
+     * @return void
+     */
 
-        //* 1. Process the list of items to be created
-        //TODO: Validate the item fields according to the data integrity rules you have in the database schema
+    public function __construct(MuseumModel $museumModel)
+    {
+        parent::__construct($museumModel);
+    }
 
-        //TODO: USE a foreach to process the list
-        //! Add error details to the $errors
-        foreach ($newMuseums as $newMuseum) {
+    /**
+     * doCreateMuseums
+     *
+     * validate and create the submitted data through a reusable function in the base service
+     *
+     * @param array $museums The submitted data to be created
+     * @return Result Result indicating success or containing validation errors
+     */
 
-        }
+    public function doCreateMuseums(array  $museums): Result {
 
-        // $newMuseum = $newMuseums[0]; only inserts one item
-        $last_inserted_id = $this->museumModel->createMuseum($newMuseum);
+        return $this->doCreateCollection($museums, self::MUSEUM_RULES, 'createMuseum');
+    }
 
-        //TODO: add the $last_inserted_id to the $created_items_ids array
 
-        //NOTE: you can return the last inserted ID.
-        //? NOTE: In case of a successful insertion -> collect and return the last inserted IDs
-        return Result::success("The new museums were created successfully!", $created_item_ids);
-        return Result::failure("Error.", $errors);
+    //TODO: Add two new public methods: One for the update operation and one for delete operation.
 
-        //TODO: Add two new public methods: One for the update operation and one for delete operation.
+    /**
+     * doUpdateMuseum
+     *
+     * validate and update the submitted data through a reusable function in the base service
+     *
+     * @param array $museums The submitted data to be updated
+     * @return Result Result indicating success or containing validation errors
+     */
+
+    public function doUpdateMuseum(array $museums) : Result {
+
+        return $this->doUpdateCollection($museums, self::MUSEUM_RULES, 'museum_id', 'updateMuseums');
+    }
+
+    /**
+     * doDeleteMuseum
+     *
+     * delete the submitted data, by its museum ID, through a reusable function in the base service
+     *
+     * @param array $museums The submitted data to be deleted
+     * @return Result Result indicating success or containing validation errors
+     */
+
+    public function doDeleteMuseum(array $museums) : Result {
+
+        return $this->doDeleteCollection($museums, 'museum_id', 'deleteMuseums');
     }
 
 }

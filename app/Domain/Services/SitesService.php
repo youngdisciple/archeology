@@ -55,7 +55,7 @@ class SitesService extends BaseService
 
         'country' => [
             'required',
-            ['lengthBetween', 1, 45],
+            ['lengthBetween', 4, 45],
             ['regex', "/^[\p{L}][\p{L}\s'.\-]*$/u"]
         ],
 
@@ -67,7 +67,7 @@ class SitesService extends BaseService
 
         'description' => [
             'required',
-            ['lengthBetween', 1, 1000]
+            ['lengthBetween', 5, 1000]
         ],
 
         'is_protected' => [
