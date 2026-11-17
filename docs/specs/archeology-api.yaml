@@ -3,7 +3,7 @@ info:
   title: Archeology API
   version: 3.1.0
   description: |
-    OpenAPI specification for the GET endpoints of Iteration 1.
+    OpenAPI specification for the documented museum, artifact, and site endpoints.
 servers:
   - url: http://localhost/archeology
     description: Local server
@@ -311,33 +311,43 @@ paths:
       tags: [Artifacts]
       operationId: listArtifacts
       summary: List artifacts
-      description: Returns a filtered, sorted, paginated collection of artifacts. Note that all values are case-insensitive strings.
+      description: Returns a filtered, sorted, paginated collection of artifacts. Query values are case-insensitive.
       parameters:
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/PageItems"
+        - name: page
+          in: query
+          description: Page number (starts from 1).
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: page_size
+          in: query
+          description: Number of records per page.
+          schema: { type: integer, minimum: 1, default: 10 }
         - name: artifact_name
           in: query
           description: Partial match on artifact name.
           schema: { type: string }
+        - name: artifact_name_2
+          in: query
+          description: Search for related artworks from the Art Institute of Chicago.
+          schema: { type: string }
         - name: artifact_type
           in: query
-          description: Exact database enum value.
+          description: Partial match on artifact type.
           schema: { type: string }
         - name: condition
           in: query
           description: Exact database enum value.
-          schema: { type: string }
+          schema: { type: string, enum: [mint, excellent, good, fair, poor] }
         - name: museum_id
           in: query
           description: Only artifacts belonging to this museum.
           schema: { type: integer, minimum: 1 }
         - name: over_estimated_value
           in: query
-          description: Lower estimated value bound
+          description: Inclusive lower estimated value bound.
           schema: { type: number, format: float, minimum: 0 }
-        - name: below_estimated_value
+        - name: under_estimated_value
           in: query
-          description: Upper estimated value bound
+          description: Inclusive upper estimated value bound.
           schema: { type: number, format: float, minimum: 0 }
         - name: sort_by
           in: query
@@ -360,6 +370,99 @@ paths:
         "406": { $ref: "#/components/responses/NotAcceptable" }
         "422": { $ref: "#/components/responses/UnprocessableEntity" }
         "500": { $ref: "#/components/responses/ServerError" }
+
+    post:
+      tags: [Artifacts]
+      operationId: createArtifacts
+      summary: Create artifact records
+      description: Creates one or more artifact records using the provided request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              items: { $ref: "#/components/schemas/ArtifactInput" }
+            example:
+              - artifact_name: Test Vase
+                artifact_type: Pottery
+                estimated_value: 1250
+                condition: good
+                material: Clay
+                weight_in_g: 450
+                height_in_cm: 25
+      responses:
+        "200":
+          description: Artifacts created successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                status: OK
+                message: The artifact(s) were created successfully
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    put:
+      tags: [Artifacts]
+      operationId: updateArtifacts
+      summary: Update artifact records
+      description: Updates artifact records identified by their artifact IDs. Each record must include artifact_name.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              items: { $ref: "#/components/schemas/ArtifactUpdate" }
+            example:
+              - artifact_id: 1
+                artifact_name: Updated Vase
+                condition: excellent
+      responses:
+        "200":
+          description: Artifacts updated successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                status: OK
+                message: The list of new artifact(s) was updated successfully
+                rows affected: 1
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    delete:
+      tags: [Artifacts]
+      operationId: deleteArtifacts
+      summary: Delete artifact records
+      description: Deletes artifact records identified by the IDs in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              items: { type: integer }
+            example: [1, 2]
+      responses:
+        "200":
+          description: Artifacts deleted successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                status: OK
+                message: The artifact(s) deletion was successful
+                rows affected: 2
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /artifacts/{artifactId}:
     get:
       tags: [Artifacts]
@@ -375,6 +478,55 @@ paths:
               schema: { $ref: "#/components/schemas/Artifact" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    put:
+      tags: [Artifacts]
+      operationId: updateArtifact
+      summary: Update an artifact by ID
+      description: Updates the artifact identified by its ID. The request body must include artifact_name.
+      parameters:
+        - $ref: "#/components/parameters/ArtifactMutationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArtifactInput" }
+            example:
+              artifact_name: Updated Vase
+              condition: excellent
+      responses:
+        "200":
+          description: Artifact updated successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                status: OK
+                message: The list of new artifact(s) was updated successfully
+                rows affected: 1
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "406": { $ref: "#/components/responses/NotAcceptable" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    delete:
+      tags: [Artifacts]
+      operationId: deleteArtifact
+      summary: Delete an artifact by ID
+      description: Deletes the artifact identified by its ID.
+      parameters:
+        - $ref: "#/components/parameters/ArtifactMutationId"
+      responses:
+        "200":
+          description: Artifact deleted successfully.
+          content:
+            application/json:
+              example:
+                code: 200
+                status: OK
+                message: The artifact(s) deletion was successful
+                rows affected: 1
         "406": { $ref: "#/components/responses/NotAcceptable" }
         "500": { $ref: "#/components/responses/ServerError" }
   /sites:
@@ -656,6 +808,13 @@ components:
       description: Positive integer artifact identifier.
       schema: { type: integer, minimum: 1 }
       example: 1
+    ArtifactMutationId:
+      name: artifactId
+      in: path
+      required: true
+      description: Integer artifact identifier.
+      schema: { type: integer }
+      example: 1
     PageParam:
       name: current_page
       in: query
@@ -869,12 +1028,32 @@ components:
         artifact_id: { type: integer }
         artifact_name: { type: string }
         estimated_value: { type: number, format: float, nullable: true }
-        artifact_type: { type: string }
-        museum_id: { type: integer }
-        condition: { type: string }
+        artifact_type: { type: string, nullable: true }
+        museum_id: { type: integer, nullable: true }
+        condition: { type: string, enum: [mint, excellent, good, fair, poor], nullable: true }
         material: { type: string, nullable: true }
         weight_in_g: { type: number, nullable: true }
         height_in_cm: { type: number, nullable: true }
+    ArtifactInput:
+      type: object
+      description: Artifact data submitted for creation or update.
+      required: [artifact_name]
+      properties:
+        artifact_name: { type: string, minLength: 1, maxLength: 150 }
+        estimated_value: { type: number, minimum: 0, maximum: 100000000 }
+        artifact_type: { type: string, maxLength: 50 }
+        museum_id: { type: integer, minimum: 0, maximum: 10000 }
+        condition: { type: string, enum: [mint, excellent, good, fair, poor] }
+        material: { type: string, maxLength: 100 }
+        weight_in_g: { type: number, minimum: 0, maximum: 100000000 }
+        height_in_cm: { type: number, minimum: 0, maximum: 1000000 }
+    ArtifactUpdate:
+      allOf:
+        - $ref: "#/components/schemas/ArtifactInput"
+        - type: object
+          required: [artifact_id]
+          properties:
+            artifact_id: { type: integer }
     Site:
       type: object
       description: Archeological site object
@@ -994,10 +1173,22 @@ components:
     ArtifactCollection:
       type: object
       properties:
-        meta: { $ref: "#/components/schemas/PaginationMeta" }
+        meta:
+          type: object
+          required: [total, offset, current_page, page_size, total_pages]
+          properties:
+            total: { type: integer, minimum: 0 }
+            offset: { type: integer, minimum: 0 }
+            current_page: { type: integer, minimum: 1 }
+            page_size: { type: integer, minimum: 1 }
+            total_pages: { type: integer, minimum: 0 }
         data:
           type: array
           items: { $ref: "#/components/schemas/Artifact" }
+        related_data_api:
+          type: object
+          additionalProperties: true
+          description: Related artworks returned when artifact_name_2 is supplied.
       required: [meta, data]
     SiteCollection:
       type: object
