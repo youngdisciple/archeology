@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Domain\Models\ArtifactsModel;
 use App\Domain\Services\ArtifactsService;
+use App\Helpers\Core\Result;
 use App\Helpers\WebServiceInvoker;
 use App\Validation\ValidationHelper;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -15,7 +16,15 @@ class ArtifactsController extends BaseController
 {
     public function __construct( private ArtifactsModel $artifactsModel, private ArtifactsService $artifactsService ) {}
 
-
+    private function renderFailure(Response $response, Result $result): Response
+    {
+        return $this->renderJson($response, [
+            'code' => 400,
+            'status' => 'Error',
+            'message' => $result->getMessage(),
+            'description' => $result->getErrors(),
+        ], 400);
+    }
     /**
     * Get a collection of artifacts
     *
@@ -100,27 +109,18 @@ class ArtifactsController extends BaseController
 
         $result = $this->artifactsService->doCreateArtifacts($payload);
 
-        $responseData = [];
-        $code = 201;
-
-        // JSON response
-        if ($result->isSuccess()) {
-            $responseData = [
-                "code" => 201,
-                "status" => 'Success',
-                "message" => 'The list of new artifact(s) was created successfully!'
-            ];
-        } else{
-            $code = 400;
-            $responseData = [
-                "code" => 400,
-                "status" => 'Error',
-                "message" => 'An error is preventing the insertion of new items into the database.',
-                "description" => $result->getErrors()
-            ];
+        if($result->isFailure()) {
+            return $this->renderFailure($response, $result);
         }
 
-        return $this->renderJson($response, $responseData, $code);
+        $responseData = [
+            "code" => 200,
+            "status" => 'OK',
+            "message" => 'The artifact(s) were created successfully',
+            "description" => $result->getErrors()
+        ];
+
+        return $this->renderJson($response, $responseData, $responseData['code']);
     }
 
     public function updateArtifacts(Request $request, Response $response, array $args): Response {
@@ -135,28 +135,18 @@ class ArtifactsController extends BaseController
 
         $result = $this->artifactsService->doUpdateArtifacts($payload);
 
-        $responseData = [];
-        $code = 200;
-
-        // JSON response
-        if ($result->isSuccess()) {
-            $responseData = [
-                "code" => 200,
-                "status" => 'OK',
-                "message" => 'The list of new artifact(s) was updated successfully',
-                'description' => $result->getData()
-            ];
-        } else{
-            $code = 400;
-            $responseData = [
-                "code" => 400,
-                "status" => 'Error',
-                "message" => 'An error is preventing the database to update the artifacts',
-                "description" => $result->getErrors()
-            ];
+        if($result->isFailure()) {
+            return $this->renderFailure($response, $result);
         }
 
-        return $this->renderJson($response, $responseData, $code);
+        $responseData = [
+            "code" => 200,
+            "status" => 'OK',
+            "message" => 'The list of new artifact(s) was updated successfully',
+            'rows affected' => $result->getData()
+        ];
+
+        return $this->renderJson($response, $responseData, $responseData['code']);
     }
 
     public function deleteArtifacts(Request $request, Response $response, array $args): Response {
@@ -165,35 +155,22 @@ class ArtifactsController extends BaseController
         if (empty($payload)) {
             throw new HttpBadRequestException(
                 $request,
-                'The payload must contain at least 1 artifact.'
+                "The payload must contain at least 1 artifact's id."
             );
         }
 
         $result = $this->artifactsService->doDeleteArtifacts($payload);
 
-        $responseData = [];
-        $code = 200;
+        $responseData = [
+            "code" => 200,
+            "status" => 'OK',
+            "message" => 'The artifact(s) deletion was successful',
+            'rows affected' => $result->getData()
+        ];
 
-        // JSON response
-        if ($result->isSuccess()) {
-            $responseData = [
-                "code" => 200,
-                "status" => 'OK',
-                "message" => 'The artifacts were deleted successfully',
-                'description' => $result->getData()
-            ];
-        } else{
-            $code = 400;
-            $responseData = [
-                "code" => 400,
-                "status" => 'Error',
-                "message" => 'An error is preventing the database to delete the artifacts',
-                "description" => $result->getErrors()
-            ];
-        }
-
-        return $this->renderJson($response, $responseData, $code);
+        return $this->renderJson($response, $responseData, $responseData['code']);
     }
+
 
     // FIX : polish composite resource
     /**

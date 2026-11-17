@@ -55,7 +55,6 @@ class ArtifactsService extends BaseService
         }
     }
 
-    //TODO: Add two new public methods: One for the update operation and one for delete operation.
     public function doUpdateArtifacts(array $artifacts): Result {
         $errors = $this->validateArtifactPayload($artifacts, true);
 
@@ -78,16 +77,15 @@ class ArtifactsService extends BaseService
             $v->rule('integer', 'artifact_id');
 
             if (!$v->validate()) {
-                array_push($errors, $v->errors());
             }
         }
 
         if (count($errors) === 0) {
             $affectedRows = $this->artifactsModel->deleteArtifacts($artifacts_ids);
 
-            return Result::success('The artifacts were deleted successfully', $affectedRows);
+            return Result::success('Artifact(s) deleted successfully', $affectedRows);
         } else {
-            return Result::failure('There was an error while deleting the artifacts', $errors);
+            return Result::failure('There was an error while deleting the artifact(s)', $errors);
         }
     }
 }
