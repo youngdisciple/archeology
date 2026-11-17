@@ -48,8 +48,9 @@ return static function (Slim\App $app): void {
     $app->get('/museums/{collection_id}', [MuseumController::class, 'handleGetMuseumById']);
     $app->get('/museums/{parent_collection_id}/scientists', [MuseumController::class, 'handleGetMuseumScientist']);
     $app->get('/museums/{parent_collection_id}/artifacts', [MuseumController::class, 'handleGetMuseumArtifact']);
-
     $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
+    $app->put('/museums', [MuseumController::class, 'handleUpdateMuseum']);
+    $app->delete('/museums', [MuseumController::class, 'handleDeleteMuseum']);
 
     // Example route to test error handling.
     $app->get('/error', function (Request $request, Response $response, $args) {
@@ -75,6 +76,10 @@ return static function (Slim\App $app): void {
     $app->get('/sites/{parent_collection_id}/periods', [SitesController::class, 'handleGetSitePeriod']);
     //!POST ROUTES FOR SITES
     $app->post('/sites', [SitesController::class, 'handleCreateSites']);
+    //!PUT ROUTES FOR SITES
+    $app->put('/sites', [SitesController::class, 'handleUpdateSites']);
+    //!DELETE ROUTES FOR SITES
+    $app->delete('/sites', [SitesController::class, 'handleDeleteSites']);
 
     //* ROUTES FOR ARTIFACTS COLLECTION
     // GET ROUTES FOR ARTIFACTS

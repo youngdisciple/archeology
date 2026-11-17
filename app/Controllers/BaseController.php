@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Domain\Models\BaseModel;
+use App\Domain\Services\BaseService;
 use App\Exceptions\UnprocessableEntityException;
 use Psr\Http\Message\ResponseInterface as Response;
-use App\Exceptions\InvalidResourceException;
+use App\Exceptions\BadRequestException;
 use App\Validation\ValidationHelper;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Helpers\WebServiceInvoker;
+use App\Exceptions\ConflictException;
+use Slim\Exception\HttpNotFoundException;
+
 
 abstract class BaseController
 {
-    public function __construct(private BaseModel $base_model) {}
+    public function __construct(private BaseModel $base_model, private BaseService $base_service, protected WebServiceInvoker $invoker) {}
 
     protected function renderJson(Response $response, array $data, int $status_code = 200): Response
     {
@@ -25,19 +30,20 @@ abstract class BaseController
     }
 
     /**
+     * GET /museums
      * A reusable function that can be used to get any collection from the database as long as the collectionName is specified
      * @param Request $request
      * @param Response $response
-     * @throws InvalidResourceException
+     * @throws BadRequestException
      * @return Response
      */
-    protected function handleGetCollection(Request $request, Response $response, string $model_func): Response
+    protected function handleGetCollection(Request $request, Response $response, string $model_func, string $uri): Response
     {
         $filters = $request->getQueryParams();
         $current_page = $filters["current_page"] ?? "1";
         $page_size = $filters["page_size"] ?? "10";
         if (!ValidationHelper::isValidPagination($current_page, $page_size)) {
-            throw new InvalidResourceException($request, "Please make sure the current_page and page_size are set to non-negative integer");
+            throw new BadRequestException($request, "Please make sure the current_page and page_size are set to non-negative integer");
         }
         $this->base_model->setPaginationOptions(
             (int)$current_page,
@@ -47,8 +53,26 @@ abstract class BaseController
             $collection = $this->base_model->$model_func($filters);
         } catch (\InvalidArgumentException $e) {
             throw new UnprocessableEntityException($request, $e->getMessage());
+        } catch (\RuntimeException $e) {
+            $e->getPrevious() instanceof \PDOException ? throw new ConflictException($request, "The requests cannot be fulfilled due to it causing conflicts in the database!") : throw $e;
         }
+        //*calling external API endpoint here
+        //$api_data = $this->getListOfComposites($uri, $filters);
+        //$collection["composite_collection"] = $api_data;
         return $this->renderJson($response, $collection);
+    }
+
+    public function getListOfComposites(string $uri, $filters): mixed
+    {
+        $object_id = $filters["object_id"] ?? "";
+        $response = [];
+        try {
+            $invoker = new WebServiceInvoker();
+            $response = $invoker->invokeUri("$uri/$object_id");
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        return $response;
     }
 
     /**
@@ -56,18 +80,18 @@ abstract class BaseController
      * @param Request $request
      * @param Response $response
      * @param array $args
-     * @throws InvalidResourceException
+     * @throws BadRequestException
      * @return Response
      */
     protected function handleGetCollectionById(Request $request, Response $response, array $args, string $model_func): Response
     {
         $collection_id = $args["collection_id"];
         if (!ValidationHelper::isValidId($collection_id)) {
-            throw new InvalidResourceException($request, "The unique ID $collection_id was invalid! It must be a whole, non-negative integer.");
+            throw new BadRequestException($request, "The unique ID $collection_id was invalid! It must be a whole, non-negative integer.");
         }
         $collection = $this->base_model->$model_func((int)$collection_id);
         if ($collection === false) {
-            throw new InvalidResourceException($request, "There was no ID record for $collection_id");
+            throw new HttpNotFoundException($request, "There was no ID record for $collection_id");
         }
         return $this->renderJson($response, $collection);
     }
@@ -78,7 +102,7 @@ abstract class BaseController
      * @param Response $response
      * @param array $args
      * @param string $model_func
-     * @throws InvalidResourceException
+     * @throws BadRequestException
      * @return Response
      */
     protected function handleGetSubCollection(Request $request, Response $response, array $args, string $model_func)
@@ -88,7 +112,7 @@ abstract class BaseController
         $current_page = $filters["current_page"] ?? "1";
         $page_size = $filters["page_size"] ?? "10";
         if (!ValidationHelper::isValidPagination($current_page, $page_size)) {
-            throw new InvalidResourceException($request, "Please make sure the current_page and page_size are set to non-negative integer");
+            throw new BadRequestException($request, "Please make sure the current_page and page_size are set to non-negative integer");
         }
         $this->base_model->setPaginationOptions(
             (int)$current_page,
@@ -96,7 +120,7 @@ abstract class BaseController
         );
         $parent_collection_id = $args["parent_collection_id"];
         if (!ValidationHelper::isValidId($parent_collection_id)) {
-            throw new InvalidResourceException($request, "The ID $parent_collection_id was invalid! It must be a whole, non-negative integer.");
+            throw new BadRequestException($request, "The ID $parent_collection_id was invalid! It must be a whole, non-negative integer.");
         }
         try {
             $sub_collection = $this->base_model->$model_func($filters, (int) $parent_collection_id);
@@ -104,8 +128,47 @@ abstract class BaseController
             throw new UnprocessableEntityException($request, $e->getMessage());
         }
         if ($sub_collection === false) {
-            throw new InvalidResourceException($request, "There was no such ID record for $parent_collection_id");
+            throw new BadRequestException($request, "There was no such ID record for $parent_collection_id");
         }
         return $this->renderJson($response, $sub_collection);
+    }
+
+    /**
+     * A jack of trades type of function that handles POST, PUT , DELETE operations
+     * @param Request $request
+     * @param Response $response
+     * @param string $service_func is the string name of your service functions for whatever operation you want to do
+     * @param string $success_msg
+     * @param string $err_msg
+     * @param int $success_code is 200 by default unless it is POST which is 201
+     * @throws BadRequestException
+     * @throws UnprocessableEntityException
+     * @return Response
+     */
+    protected function handleCollectionOperation(Request $request, Response $response, string $service_func, string $success_msg, string $err_msg, int $success_code = 200): Response
+    {
+        $body = $request->getParsedBody();
+        $payload = is_array($body) ? $body : throw new BadRequestException($request); //making sure body request isn't empty or it causes a 500 error
+        try {
+            $result = $this->base_service->$service_func($payload);
+        } catch (\OutOfBoundsException $e) {
+            throw new HttpNotFoundException($request, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            throw new UnprocessableEntityException($request, $e->getMessage());
+        } catch (\RuntimeException $e) {
+            $e->getPrevious() instanceof \PDOException ? throw new ConflictException($request, "The requests cannot be fulfilled due to it causing conflicts in the database!") : throw $e;
+        }
+        $response_data = [];
+        if ($result->isSuccess()) {
+            $response_data = [
+                "code" => $success_code,
+                "message" => $success_msg
+            ];
+            return $this->renderJson($response, $response_data, $success_code);
+        }
+        if ($result->isFailure()) {
+            throw (new BadRequestException($request, $err_msg));
+        }
+        return $response;
     }
 }
