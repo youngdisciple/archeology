@@ -149,6 +149,33 @@ class ArtifactsController extends BaseController
         return $this->renderJson($response, $responseData, $responseData['code']);
     }
 
+    public function updateArtifact(Request $request, Response $response, array $args): Response {
+        $id = $args['artifact_id'];
+        $payload = $request->getParsedBody();
+
+        if (empty($payload)) {
+            throw new HttpBadRequestException(
+                $request,
+                'The payload cannot be empty.'
+            );
+        }
+
+        $result = $this->artifactsService->doUpdateOneArtifact($id, $payload);
+
+        if($result->isFailure()) {
+            return $this->renderFailure($response, $result);
+        }
+
+        $responseData = [
+            "code" => 200,
+            "status" => 'OK',
+            "message" => 'The list of new artifact(s) was updated successfully',
+            'rows affected' => $result->getData()
+        ];
+
+        return $this->renderJson($response, $responseData, $responseData['code']);
+    }
+
     public function deleteArtifacts(Request $request, Response $response, array $args): Response {
         $payload = $request->getParsedBody();
 
@@ -170,6 +197,23 @@ class ArtifactsController extends BaseController
 
         return $this->renderJson($response, $responseData, $responseData['code']);
     }
+
+
+    public function deleteArtifact(Request $request, Response $response, array $args): Response {
+        $id = $args['artifact_id'];
+
+        $result = $this->artifactsService->doDeleteOneArtifact($id);
+
+        $responseData = [
+            "code" => 200,
+            "status" => 'OK',
+            "message" => 'The artifact(s) deletion was successful',
+            'rows affected' => $result->getData()
+        ];
+
+        return $this->renderJson($response, $responseData, $responseData['code']);
+    }
+
 
 
     // FIX : polish composite resource

@@ -67,6 +67,12 @@ class ArtifactsService extends BaseService
         }
     }
 
+    public function doUpdateOneArtifact(int $id, array $artifact): Result {
+        $artifact['artifact_id'] = $id;
+
+        return $this->doUpdateArtifacts([$artifact]);
+    }
+
     public function doDeleteArtifacts(array $artifacts_ids): Result {
         $errors = [];
 
@@ -87,5 +93,10 @@ class ArtifactsService extends BaseService
         } else {
             return Result::failure('There was an error while deleting the artifact(s)', $errors);
         }
+    }
+
+
+    public function doDeleteOneArtifact(int $id): Result {
+        return $this->doDeleteArtifacts([$id]);
     }
 }
