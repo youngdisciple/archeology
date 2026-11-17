@@ -27,15 +27,18 @@ class AboutController extends BaseController
                     [
                         'path' => '/artifacts',
                         'methods' => [
-                            'GET' => 'List artifacts'
-                            // TODO: eventually, add different methods like POST
-                            // and describe what they would do
+                            'GET' => 'List artifacts',
+                            'POST' => 'Create artifact(s) from the request body',
+                            'PUT' => 'Update existing artifact(s) from the request body',
+                            'DELETE' => 'Delete existing artifact(s) from the request body'
                         ]
                     ],
                     [
                         'path' => '/artifacts/{artifact_id}',
                         'methods' => [
-                            'GET' => 'Show a specific artifact'
+                            'GET' => 'Show a specific artifact',
+                            'PUT' => 'Update a specific artifact from the request body',
+                            'DELETE' => 'Delete a specific artifact'
                         ]
                     ],
                     // NOTE: Because artifacts is on top of the tree, it doesn't have any subcollection
