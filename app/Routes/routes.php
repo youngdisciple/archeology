@@ -29,8 +29,14 @@ return static function (Slim\App $app): void {
     $app->get('/scientists/{collection_id}', [ScientistsController::class, 'handleGetScientistById']);
     //* ROUTE: GET /scientists/{id}/excavations
     $app->get('/scientists/{parent_collection_id}/excavations', [ScientistsController::class, 'handleGetScientistExcavation']);
-    //* ROUTE: GET /scientists
+    //* ROUTE: POST /scientists
     $app->post('/scientists', [ScientistsController::class, 'handleCreateScientists']);
+    //* ROUTE: PUT /scientists
+    $app->put('/scientists', [ScientistsController::class, 'handleUpdateScientists']);
+    //* ROUTE: DELETE /scientists
+    $app->delete('/scientists', [ScientistsController::class, 'handleDeleteScientists']);
+
+
 
     //* ROUTE: GET /ping
     $app->get('/ping', function (Request $request, Response $response, $args) {

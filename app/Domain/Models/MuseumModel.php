@@ -209,7 +209,8 @@ class MuseumModel extends BaseModel
         ];
 
         $sortableFields = [
-            'name',
+            'first_name',
+            'last_name',
             'specialization',
             'degree',
             'years_of_experience'

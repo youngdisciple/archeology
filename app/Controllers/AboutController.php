@@ -72,7 +72,10 @@ class AboutController extends BaseController
                     [
                         'path' => '/scientists',
                         'methods' => [
-                            'GET' => 'List scientists'
+                            'GET' => 'List scientists',
+                            'POST' => 'Creates all scientists that are in the body of the request',
+                            'PUT' => 'Updates all scientists that are in the body of the request',
+                            'DELETE' => 'Deletes all scientists that are in the body of the request'
                         ]
                     ],
                     [
@@ -86,7 +89,7 @@ class AboutController extends BaseController
                         'methods' => [
                             'GET' => 'Shows all excavations a scientist was involved in'
                         ]
-                    ]
+                    ],
                 ]
             ]
         ];
