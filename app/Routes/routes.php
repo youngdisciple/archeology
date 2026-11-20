@@ -10,6 +10,7 @@ use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Controllers\ScientistsController;
+use Slim\Routing\RouteCollectorProxy;
 
 return static function (Slim\App $app): void {
 
@@ -36,19 +37,6 @@ return static function (Slim\App $app): void {
     //* ROUTE: DELETE /scientists
     $app->delete('/scientists', [ScientistsController::class, 'handleDeleteScientists']);
 
-
-
-    //* ROUTE: GET /ping
-    $app->get('/ping', function (Request $request, Response $response, $args) {
-
-        $payload = [
-            "greetings" => "Reporting! Hello there!",
-            "now" => DateTimeHelper::now(DateTimeHelper::Y_M_D_H_M),
-        ];
-        $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR));
-        return $response;
-    });
-
     //* Museum routes
     $app->get('/museums', [MuseumController::class, 'handleGetMuseums']);
     $app->get('/museums/{collection_id}', [MuseumController::class, 'handleGetMuseumById']);
@@ -57,22 +45,6 @@ return static function (Slim\App $app): void {
     $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
     $app->put('/museums', [MuseumController::class, 'handleUpdateMuseum']);
     $app->delete('/museums', [MuseumController::class, 'handleDeleteMuseum']);
-
-    // Example route to test error handling.
-    $app->get('/error', function (Request $request, Response $response, $args) {
-        throw new \Slim\Exception\HttpNotFoundException($request, "Something went wrong");
-    });
-
-    //* ROUTE: GET /phpinfo -> Display PHP configuration (useful for Docker)
-    //* Docker URL: http://localhost:8080/phpinfo
-    $app->get('/phpinfo', function (Request $request, Response $response, $args) {
-        ob_start();
-        phpinfo();
-        $info = ob_get_clean();
-        $response->getBody()->write($info);
-        return $response->withHeader('Content-Type', 'text/html');
-    });
-
 
     //*ROUTES FOR SITES COLLECTION
     //!GET ROUTES FOR SITES
@@ -102,4 +74,32 @@ return static function (Slim\App $app): void {
     // DELETE
     $app->delete('/artifacts', [ArtifactsController::class, 'deleteArtifacts']);
     $app->delete('/artifacts/{artifact_id}', [ArtifactsController::class, 'deleteArtifact']);
+
+
+
+    //* ROUTE: GET /ping
+    $app->get('/ping', function (Request $request, Response $response, $args) {
+
+        $payload = [
+            "greetings" => "Reporting! Hello there!",
+            "now" => DateTimeHelper::now(DateTimeHelper::Y_M_D_H_M),
+        ];
+        $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR));
+        return $response;
+    });
+
+    // Example route to test error handling.
+    $app->get('/error', function (Request $request, Response $response, $args) {
+        throw new \Slim\Exception\HttpNotFoundException($request, "Something went wrong");
+    });
+
+    //* ROUTE: GET /phpinfo -> Display PHP configuration (useful for Docker)
+    //* Docker URL: http://localhost:8080/phpinfo
+    $app->get('/phpinfo', function (Request $request, Response $response, $args) {
+        ob_start();
+        phpinfo();
+        $info = ob_get_clean();
+        $response->getBody()->write($info);
+        return $response->withHeader('Content-Type', 'text/html');
+    });
 };
