@@ -63,3 +63,5 @@ $RECYCLE.BIN/
 
 app/Controllers/TestController.php
 app/Domain/Models/TestModel.php
+
+logs/
