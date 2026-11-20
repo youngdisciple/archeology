@@ -152,6 +152,53 @@ CREATE TABLE discovery (
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ws_users`
+--
+
+DROP TABLE IF EXISTS `ws_users`;
+CREATE TABLE IF NOT EXISTS `ws_users` (
+  `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` varchar(32) NOT NULL UNIQUE,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(150) NOT NULL,
+  `email` varchar(150) NOT NULL UNIQUE,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(10) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+--
+-- Table structure for table `ws_log`
+--
+
+DROP TABLE IF EXISTS `ws_log`;
+CREATE TABLE IF NOT EXISTS `ws_log` (
+  `log_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `email` varchar(150) NOT NULL,
+  `user_action` varchar(255) NOT NULL,
+  `logged_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_id` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`log_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
 -- ---------------------------------------------------------------------
 -- Indexes: none needed here. InnoDB automatically creates an index on
 -- every foreign key column, so the CREATE INDEX statements from the
@@ -327,3 +374,10 @@ INSERT INTO discovery (discovery_id, discovery_date, depth_found, notes, excavat
 -- UNION ALL SELECT 'artifacts', COUNT(*) FROM artifacts
 -- UNION ALL SELECT 'excavations', COUNT(*) FROM excavations
 -- UNION ALL SELECT 'discovery', COUNT(*) FROM discovery;
+
+--  ---------------------------------------------------------------------
+-- ws_users table `insertion
+INSERT INTO `ws_users` (`username`, `first_name`, `last_name`, `email`, `password`, `role`)
+VALUES
+('admin', 'System', 'Administrator', 'admin@example.com', '$2y$10$exampleHashedPasswordForAdmin', 'admin'),
+('general', 'John', 'Doe', 'john.doe@example.com', '$2y$10$exampleHashedPasswordForUser', 'general');
