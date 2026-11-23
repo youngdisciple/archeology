@@ -9,6 +9,7 @@ use App\Helpers\Core\PDOService;
 use App\Helpers\PaginationHelper;
 use App\Helpers\DateTimeHelper;
 use Exception;
+use App\Helpers\WebServiceInvoker;
 
 /**
  * A wrapper class for interacting with a MySQL DB using the PDO API.
@@ -461,8 +462,20 @@ abstract class BaseModel
             $sortableFields,
             $tableName
         );
-
         return $this->paginate($sql, $params);
+    }
+
+    public function getListOfComposites(string $uri, $filters): mixed
+    {
+        $object_id = $filters["object_id"] ?? "";
+        $response = [];
+        try {
+            $invoker = new WebServiceInvoker();
+            $response = $invoker->invokeUri("$uri/$object_id");
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        return $response;
     }
 
     /**

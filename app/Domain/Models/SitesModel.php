@@ -2,6 +2,8 @@
 
 namespace App\Domain\Models;
 
+use App\Helpers\WebServiceInvoker;
+
 class SitesModel extends BaseModel
 {
     private const FILTER_CONFIG = [
@@ -37,6 +39,7 @@ class SitesModel extends BaseModel
     public function getSites(array $filters): array
     {
         $data = $this->getCollection($filters, 'archeological_site', self::FILTER_CONFIG, self::SORTABLE_FIELDS);
+        $data["objects"] = $this->getListOfComposites("https://api.artic.edu/api/v1/places", $filters);
         return $data;
     }
 

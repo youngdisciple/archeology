@@ -52,6 +52,7 @@ return static function (Slim\App $app): void {
     $app->get('/sites/{collection_id}', [SitesController::class, 'handleGetSitesById']);
     $app->get('/sites/{parent_collection_id}/cultures', [SitesController::class, 'handleGetSiteCulture']);
     $app->get('/sites/{parent_collection_id}/periods', [SitesController::class, 'handleGetSitePeriod']);
+    $app->get('/sites/', [SitesController::class, 'getListOfObjects']);
     //!POST ROUTES FOR SITES
     $app->post('/sites', [SitesController::class, 'handleCreateSites']);
     //!PUT ROUTES FOR SITES

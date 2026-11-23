@@ -19,7 +19,17 @@ class WebServiceInvoker
         $client = new Client();
 
         try {
-            $response = $client->request('GET', $resourceUri, $this->request_options);
+            $response = $client->request(
+                'GET',
+                $resourceUri, //$this->request_options
+                [
+                    'headers' => [
+                        'User-Agent' => 'ArcheologyApp/1.0 danielperrotta12066@gmail.com',
+                        'AIC-User-Agent' => 'ArcheologyApp danielperrotta12066@gmail.com',
+                        'Accept' => 'application/json',
+                    ]
+                ]
+            );
         } catch (GuzzleException $ex) {
             throw new Exception($ex);
         }
