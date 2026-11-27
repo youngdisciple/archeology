@@ -48,11 +48,15 @@ class MuseumController extends BaseController
      * @return Response HTTP response produced by the base controller handler
      */
 
-    public function handleGetMuseums(Request $request, Response $response, array $args): Response
+    public function handleGetMuseums(Request $request, Response $response/*, array $args*/): Response
     {
+        return $this->handleGetCollection($request, $response, 'getMuseums');
+        //*didn't fully remove in case something breaks
+        /*
         // CALL the remote API here.
         $objectID = $args["objectID"] ?? "437133";
         return $this->handleGetCollection($request, $response, 'getMuseums',"https://collectionapi.metmuseum.org/public/collection/v1/objects/$objectID" );
+        */
     }
 
     /**

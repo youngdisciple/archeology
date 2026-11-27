@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Middleware\HelloMiddleware;
 use App\Middleware\ContentNegotiationMiddleware;
+use App\Middleware\LoggingMiddleware;
 use Slim\App;
 
 return function (App $app) {
@@ -12,6 +13,8 @@ return function (App $app) {
     $app->addBodyParsingMiddleware();
     $app->addRoutingMiddleware();
     $app->add(ContentNegotiationMiddleware::class);
+    $app->add(LoggingMiddleware::class);
+
 
     //!NOTE: the error handling middleware MUST be added last.
     $errorMiddleware = $app->addErrorMiddleware(true, true, true);

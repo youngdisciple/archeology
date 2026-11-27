@@ -19,7 +19,11 @@ class WebServiceInvoker
         $client = new Client();
 
         try {
-            $response = $client->request('GET', $resourceUri, $this->request_options);
+            $response = $client->request(
+                'GET',
+                $resourceUri,
+                $this->request_options
+            );
         } catch (GuzzleException $ex) {
             throw new Exception($ex);
         }

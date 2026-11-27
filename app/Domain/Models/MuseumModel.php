@@ -106,8 +106,8 @@ class MuseumModel extends BaseModel
             $filterConfig,
             $sortableFields
         );
-        $data["objects"] = $this->getListOfObjects($filters);
-
+        //$data["objects"] = $this->getListOfObjects($filters);
+        $data["objects"] = $this->getListOfComposites("https://collectionapi.metmuseum.org/public/collection/v1/objects", $filters);
         return $data;
     }
 
@@ -120,6 +120,7 @@ class MuseumModel extends BaseModel
      * @return mixed Response returned by the web service invoker
      */
 
+/*
     public function getListOfObjects($filters): mixed
     {
         //TODO: extract the filter that identifies the object id you want to pull?
@@ -136,6 +137,7 @@ class MuseumModel extends BaseModel
 
         return $response;
     }
+*/
 
     /**
      * getMuseumById
@@ -288,7 +290,7 @@ class MuseumModel extends BaseModel
      * @param array $museum Museum values to insert
      * @return mixed
      */
-    public function createMuseum(array $museum) : mixed
+    public function createMuseum(array $museum): mixed
     {
         return $this->insert(
             "museum",
@@ -306,7 +308,7 @@ class MuseumModel extends BaseModel
      * @return mixed
      */
 
-    public function updateMuseums(array $museum, int $museum_id) : mixed
+    public function updateMuseums(array $museum, int $museum_id): mixed
     {
         return $this->update(
             "museum",
@@ -326,7 +328,7 @@ class MuseumModel extends BaseModel
      * @return mixed
      */
 
-    public function deleteMuseums(int $museum_id, int $limit = 1) : mixed
+    public function deleteMuseums(int $museum_id, int $limit = 1): mixed
     {
         return $this->delete(
             "museum",

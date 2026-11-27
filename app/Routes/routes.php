@@ -54,18 +54,44 @@ return static function (Slim\App $app): void {
         // DELETE
         $group->delete('/sites', [SitesController::class, 'handleDeleteSites']);
 
-        //* Artifacts Routes
-        // GET
-        $group->get('/artifacts', [ArtifactsController::class, 'index']);
-        $group->get('/artifacts/{artifact_id}', [ArtifactsController::class, 'show']);
-        // POST
-        $group->post('/artifacts', [ArtifactsController::class, 'createArtifacts']);
-        // PUT
-        $group->put('/artifacts', [ArtifactsController::class, 'updateArtifacts']);
-        $group->put('/artifacts/{artifact_id}', [ArtifactsController::class, 'updateArtifact']);
-        // DELETE
-        $group->delete('/artifacts', [ArtifactsController::class, 'deleteArtifacts']);
-        $group->delete('/artifacts/{artifact_id}', [ArtifactsController::class, 'deleteArtifact']);
+    //* Museum routes
+    $app->get('/museums', [MuseumController::class, 'handleGetMuseums']);
+    $app->get('/museums/{collection_id}', [MuseumController::class, 'handleGetMuseumById']);
+    $app->get('/museums/{parent_collection_id}/scientists', [MuseumController::class, 'handleGetMuseumScientist']);
+    $app->get('/museums/{parent_collection_id}/artifacts', [MuseumController::class, 'handleGetMuseumArtifact']);
+    $app->post('/museums', [MuseumController::class, 'handleCreateMuseum']);
+    $app->put('/museums', [MuseumController::class, 'handleUpdateMuseum']);
+    $app->delete('/museums', [MuseumController::class, 'handleDeleteMuseum']);
+
+    //*ROUTES FOR SITES COLLECTION
+    //!GET ROUTES FOR SITES
+    $app->get('/sites', [SitesController::class, 'handleGetSites']);
+    $app->get('/sites/{collection_id}', [SitesController::class, 'handleGetSitesById']);
+    $app->get('/sites/{parent_collection_id}/cultures', [SitesController::class, 'handleGetSiteCulture']);
+    $app->get('/sites/{parent_collection_id}/periods', [SitesController::class, 'handleGetSitePeriod']);
+    $app->get('/sites/', [SitesController::class, 'getListOfObjects']);
+    //!POST ROUTES FOR SITES
+    $app->post('/sites', [SitesController::class, 'handleCreateSites']);
+    //!PUT ROUTES FOR SITES
+    $app->put('/sites', [SitesController::class, 'handleUpdateSites']);
+    //!DELETE ROUTES FOR SITES
+    $app->delete('/sites', [SitesController::class, 'handleDeleteSites']);
+
+    //* ROUTES FOR ARTIFACTS COLLECTION
+    // GET ROUTES FOR ARTIFACTS
+    $app->get('/artifacts', [ArtifactsController::class, 'index']);
+    $app->get('/artifacts/{artifact_id}', [ArtifactsController::class, 'show']);
+
+    // POST
+    $app->post('/artifacts', [ArtifactsController::class, 'createArtifacts']);
+
+    // PUT
+    $app->put('/artifacts', [ArtifactsController::class, 'updateArtifacts']);
+    $app->put('/artifacts/{artifact_id}', [ArtifactsController::class, 'updateArtifact']);
+
+    // DELETE
+    $app->delete('/artifacts', [ArtifactsController::class, 'deleteArtifacts']);
+    $app->delete('/artifacts/{artifact_id}', [ArtifactsController::class, 'deleteArtifact']);
 
         //* Scientist Routes
         // GET

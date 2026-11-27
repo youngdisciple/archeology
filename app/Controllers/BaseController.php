@@ -37,7 +37,7 @@ abstract class BaseController
      * @throws BadRequestException
      * @return Response
      */
-    protected function handleGetCollection(Request $request, Response $response, string $model_func, string $uri): Response
+    protected function handleGetCollection(Request $request, Response $response, string $model_func): Response
     {
         $filters = $request->getQueryParams();
         $current_page = $filters["current_page"] ?? "1";
@@ -56,23 +56,7 @@ abstract class BaseController
         } catch (\RuntimeException $e) {
             $e->getPrevious() instanceof \PDOException ? throw new ConflictException($request, "The requests cannot be fulfilled due to it causing conflicts in the database!") : throw $e;
         }
-        //*calling external API endpoint here
-        //$api_data = $this->getListOfComposites($uri, $filters);
-        //$collection["composite_collection"] = $api_data;
         return $this->renderJson($response, $collection);
-    }
-
-    public function getListOfComposites(string $uri, $filters): mixed
-    {
-        $object_id = $filters["object_id"] ?? "";
-        $response = [];
-        try {
-            $invoker = new WebServiceInvoker();
-            $response = $invoker->invokeUri("$uri/$object_id");
-        } catch (\Throwable $th) {
-            throw $th;
-        }
-        return $response;
     }
 
     /**
