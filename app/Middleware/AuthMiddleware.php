@@ -46,7 +46,7 @@ class AuthMiddleware implements MiddlewareInterface
         //         The scheme name is case-insensitive: accept "bearer" too.
         //         If the format is invalid, throw an HttpUnauthorizedException
         //         with the message "Invalid token format".
-        $jwt = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJleGFtcGxlLm9yZyIsImF1ZCI6ImV4YW1wbGUuY29tIiwiaWF0IjoxNzk1MTE0MjI0LCJleHAiOjE3OTUxMTQyMjksInVzZXJfaWQiOjEsInVzZXJuYW1lIjoiajRuZSIsImVtYWlsIjoiamFuZWRvZUBnbWFpbC5jb20iLCJyb2xlIjoiZ2VuZXJhbCJ9.NlZjJP4DPlVO8I3AwQw5NqOfkXzAPu9Gn9YCgeAfmQ4";
+        $jwt = "";
 
         $clean_jwt = str_replace("Bearer ", "", $jwt);
 

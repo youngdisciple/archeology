@@ -32,6 +32,7 @@
     "ext-pdo": "*",
     "fig/http-message-util": "^1.1",
     "firebase/php-jwt": "^7.0",
+    "frostybee/geobee": "^2.0",
     "frostybee/valicomb": "^1.5",
     "guzzlehttp/guzzle": "^7.10",
     "monolog/monolog": "^3.10",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "36eb78681df99d5931be06aef244e973",
+    "content-hash": "4040127d7f3951df1825ca955e5c1f89",
     "packages": [
         {
             "name": "fig/http-message-util",
@@ -135,6 +135,55 @@
                 "source": "https://github.com/googleapis/php-jwt/tree/v7.2.0"
             },
             "time": "2026-09-21T19:29:58+00:00"
+        },
+        {
+            "name": "frostybee/geobee",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/frostybee/geobee.git",
+                "reference": "b5be1f4e9b67cea42e5ec95bfb0e32a08d645848"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/frostybee/geobee/zipball/b5be1f4e9b67cea42e5ec95bfb0e32a08d645848",
+                "reference": "b5be1f4e9b67cea42e5ec95bfb0e32a08d645848",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Frostybee\\Geobee\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frostybee",
+                    "homepage": "https://github.com/frostybee"
+                }
+            ],
+            "description": "A simple, stand-alone PHP library for calculating the distance between geographical coordinates.",
+            "homepage": "https://github.com/frostybee/geobee",
+            "keywords": [
+                "geodesic distance",
+                "great-circle distance",
+                "haversine"
+            ],
+            "support": {
+                "issues": "https://github.com/frostybee/geobee/issues",
+                "source": "https://github.com/frostybee/geobee/tree/v2.0.0"
+            },
+            "time": "2025-11-16T17:15:39+00:00"
         },
         {
             "name": "frostybee/valicomb",
